@@ -20,6 +20,10 @@ class UserRepository {
     findAll() {
         return User.findAll({ attributes: { exclude: ['password'] } });
     }
+
+    async delete(id) {
+        return User.destroy({ where: { id } });
+    }
 }
 
 export default new UserRepository();
