@@ -45,7 +45,10 @@ export class Server {
         app.get("/users/email/:email", authMiddleware, requireAdmin, (req, res) => userController.getUserByEmail(req, res));
         app.get("/users/username/:username", authMiddleware, requireAdmin, (req, res) => userController.getUserByUsername(req, res));
         app.get("/users", authMiddleware, (req, res) => userController.getUsers(req, res));
-        app.put("/users/me", authMiddleware, (req, res) => userController.updateMe(req, res));
+        app.put("/users/me/update", authMiddleware, (req, res) => userController.updateMe(req, res));
+        app.put("/users/username/:username/update", authMiddleware, requireAdmin, (req, res) => userController.updateUser(req, res));
+        app.delete("/users/me/delete", authMiddleware, (req, res) => userController.deleteMe(req, res));
+        app.delete("/users/username/:username/delete", authMiddleware, requireAdmin, (req, res) => userController.deleteUser(req, res));
 
         app.listen(port, () => {
             console.log(`Example app listening on port ${port}`)

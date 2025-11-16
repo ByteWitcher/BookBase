@@ -1,30 +1,30 @@
-import userRepo from "../repositories/user.repository.js";
+import userRepository from "../repositories/user.repository.js";
 
 class UserService {
     getUserById(id) {
-        return userRepo.findById(id);
+        return userRepository.findById(id);
     }
 
     getUserByEmail(email) {
-        return userRepo.findByEmail(email);
+        return userRepository.findByEmail(email);
     }
 
     getUserByUsername(username) {
-        return userRepo.findByUsername(username);
+        return userRepository.findByUsername(username);
     }
 
     getUsers() {
-        return userRepo.findAll();
+        return userRepository.findAll();
     }
 
-    async updateUser(id, data) {
-        const user = await userRepo.findById(id);
+    async updateUser(id, req, data) {
+        const user = await userRepository.findById(id);
         if (!user) {
             throw new Error("User not found");
         }
 
         if (data.email && data.email !== user.email) {
-            const existingEmail = await userRepo.findByEmail(data.email);
+            const existingEmail = await userRepository.findByEmail(data.email);
             if (existingEmail) {
                 throw new Error("Email already in use");
             }
@@ -32,14 +32,26 @@ class UserService {
         }
 
         if (data.username && data.username !== user.username) {
-            const existingUsername = await userRepo.findByUsername(data.username);
+            const existingUsername = await userRepository.findByUsername(data.username);
             if (existingUsername) {
                 throw new Error("Username already in use");
             }
             user.username = data.username;
         }
 
+        if (data.role && req && req.role === "ADMIN") {
+            user.role = data.role;
+        }
+
         return await user.save();
+    }
+
+    async deleteUser(id) {
+        const user = await userRepository.findById(id);
+        if (!user) {
+            throw new Error("User not found");
+        }
+        await userRepository.delete(id);
     }
 }
 
