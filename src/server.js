@@ -40,11 +40,12 @@ export class Server {
         app.post("/auth/reset-password", (req, res) => authController.resetPassword(req, res));
 
         // USER CONTROLLER
-        app.get("/users", authMiddleware, (req, res) => userController.getUsers(req, res));
         app.get("/users/me", authMiddleware, (req, res) => userController.getMe(req, res));
         app.get("/users/id/:id", authMiddleware, requireAdmin, (req, res) => userController.getUserById(req, res));
         app.get("/users/email/:email", authMiddleware, requireAdmin, (req, res) => userController.getUserByEmail(req, res));
         app.get("/users/username/:username", authMiddleware, requireAdmin, (req, res) => userController.getUserByUsername(req, res));
+        app.get("/users", authMiddleware, (req, res) => userController.getUsers(req, res));
+        app.put("/users/me", authMiddleware, (req, res) => userController.updateMe(req, res));
 
         app.listen(port, () => {
             console.log(`Example app listening on port ${port}`)
