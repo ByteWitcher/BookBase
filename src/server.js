@@ -41,6 +41,7 @@ export class Server {
 
         // USER CONTROLLER
         app.get("/users", authMiddleware, (req, res) => userController.getUsers(req, res));
+        app.get("/users/me", authMiddleware, (req, res) => userController.getMe(req, res));
         app.get("/users/id/:id", authMiddleware, requireAdmin, (req, res) => userController.getUserById(req, res));
         app.get("/users/email/:email", authMiddleware, requireAdmin, (req, res) => userController.getUserByEmail(req, res));
         app.get("/users/username/:username", authMiddleware, requireAdmin, (req, res) => userController.getUserByUsername(req, res));

@@ -1,6 +1,12 @@
 import userService from "../services/user.service.js";
 
 class UserController {
+    async getMe(req, res) {
+        const user = await userService.getUserByEmail(req.user.email);
+        if (!user) return res.status(404).json({ error: "Not found" });
+        res.json(user);
+    }
+
     async getUserById(req, res) {
         const user = await userService.getUserById(req.params.id);
         if (!user) return res.status(404).json({ error: "Not found" });
