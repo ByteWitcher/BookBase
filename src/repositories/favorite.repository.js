@@ -1,9 +1,9 @@
 import Favorite from '../entities/favorite.entity.js';
 import Book from '../entities/book.entity.js';
-import User from '../entities/user.entity.js';
 
 class FavoriteRepository {
-   //Ajouter un livre aux favoris
+
+  // Ajouter un livre aux favoris
   async addFavorite(userId, bookId) {
     try {
       return await Favorite.create({ userId, bookId });
@@ -15,20 +15,16 @@ class FavoriteRepository {
     }
   }
 
-
-   // Retirer un livre des favoris
+  // Retirer un livre des favoris
   async removeFavorite(userId, bookId) {
-    const deleted = await Favorite.destroy({
+    return await Favorite.destroy({
       where: { userId, bookId }
     });
-    return deleted;
   }
 
-
-   // Récupérer les livres favoris d'un utilisateur
-
+  // Récupérer les favoris (avec pagination correcte)
   async getUserFavorites(userId, { limit = 10, offset = 0 } = {}) {
-    return await Favorite.findAll({
+    return await Favorite.findAndCountAll({
       where: { userId },
       include: [
         {
@@ -39,27 +35,18 @@ class FavoriteRepository {
       ],
       limit,
       offset,
-      order: [['createdAt', 'DESC']] // Si vous ajoutez un createdAt plus tard
+      order: [['createdAt', 'DESC']]
     });
   }
 
-
-   // Vérifier si un livre est dans les favoris
-
+  // Vérifier si favori
   async isFavorited(userId, bookId) {
-    const favorite = await Favorite.findOne({
-      where: { userId, bookId }
-    });
-    return !!favorite;
+    return !!(await Favorite.findOne({ where: { userId, bookId } }));
   }
 
-
-   // Compter le nombre de favoris d'un livre
-  
+  // Compter les favoris d'un livre
   async countBookFavorites(bookId) {
-    return await Favorite.count({
-      where: { bookId }
-    });
+    return await Favorite.count({ where: { bookId } });
   }
 }
 

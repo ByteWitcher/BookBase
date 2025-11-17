@@ -37,7 +37,7 @@ const Review = sequelize.define('Review', {
   }
 }, {
   timestamps: true,
-  updatedAt: false,
+  updatedAt: true,
   createdAt: 'createdAt',
   tableName: 'reviews',
   indexes: [

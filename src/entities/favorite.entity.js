@@ -19,7 +19,7 @@ const Favorite = sequelize.define('Favorite', {
     }
   }
 }, {
-  timestamps: false,
+  timestamps: true,
   tableName: 'favorites',
   indexes: [
     {
