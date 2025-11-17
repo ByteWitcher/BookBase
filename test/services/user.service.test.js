@@ -3,8 +3,8 @@ import sinon from "sinon";
 import userService from "../../src/services/user.service.js";
 import userRepository from "../../src/repositories/user.repository.js";
 
-describe("UserService.updateUser()", () => {
-
+describe("updateUser()", () => {
+  
   afterEach(() => sinon.restore());
 
   it("throws if user not found", async () => {
@@ -205,6 +205,23 @@ describe("UserService.updateUser()", () => {
     expect(result.email).to.equal("test@mail.com");
     expect(result.username).to.equal("testUser");
     expect(result.role).to.equal("USER");
+  });
+  
+});
+
+describe("deleteUser()", () => {
+  
+  afterEach(() => sinon.restore());
+  
+  it("throws if user not found", async () => {
+    sinon.stub(userRepository, "findById").resolves(null);
+
+    try {
+      await userService.deleteUser(1);
+      throw new Error("Expected error");
+    } catch (err) {
+      expect(err.message).to.equal("User not found");
+    }
   });
 
   it("deletes user successfully", async () => {
