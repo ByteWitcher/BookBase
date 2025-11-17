@@ -4,7 +4,7 @@ import userService from "../../src/services/user.service.js";
 import userRepository from "../../src/repositories/user.repository.js";
 
 describe("UserService.updateUser()", () => {
-  
+
   afterEach(() => sinon.restore());
 
   it("throws if user not found", async () => {
@@ -66,6 +66,30 @@ describe("UserService.updateUser()", () => {
     }
   });
 
+  it("updates email successfully", async () => {
+    const savedUser = sinon.stub().resolvesThis();
+    
+    sinon.stub(userRepository, "findById").resolves({
+      id: 1,
+      email: "test@mail.com",
+      username: "oldUser",
+      role: "USER",
+      save: savedUser,
+    });
+
+    sinon.stub(userRepository, "findByEmail").resolves(null);
+    sinon.stub(userRepository, "findByUsername").resolves(null);
+
+    const result = await userService.updateUser(
+      1,
+      { role: "USER" },
+      { email: "new@mail.com" }
+    );
+
+    expect(savedUser.calledOnce).to.be.true;
+    expect(result.email).to.equal("new@mail.com");
+  });
+
   it("updates username successfully", async () => {
     const savedUser = sinon.stub().resolvesThis();
 
@@ -88,6 +112,99 @@ describe("UserService.updateUser()", () => {
 
     expect(savedUser.calledOnce).to.be.true;
     expect(result.username).to.equal("newUser");
+  });
+
+  it("updates role successfully by admin", async () => {
+    const savedUser = sinon.stub().resolvesThis();
+
+    sinon.stub(userRepository, "findById").resolves({
+      id: 1,
+      email: "test@mail.com",
+      username: "oldUser",
+      role: "USER",
+      save: savedUser,
+    });
+
+    sinon.stub(userRepository, "findByEmail").resolves(null);
+    sinon.stub(userRepository, "findByUsername").resolves(null);
+
+    const result = await userService.updateUser(
+      1,
+      { role: "ADMIN" },
+      { role: "ADMIN" }
+    );
+
+    expect(savedUser.calledOnce).to.be.true;
+    expect(result.role).to.equal("ADMIN");
+  });
+
+  it("does not update role if not admin", async () => {
+    const savedUser = sinon.stub().resolvesThis();
+
+    sinon.stub(userRepository, "findById").resolves({
+      id: 1,
+      email: "test@mail.com",
+      username: "oldUser",
+      role: "USER",
+      save: savedUser,
+    });
+
+    sinon.stub(userRepository, "findByEmail").resolves(null);
+    sinon.stub(userRepository, "findByUsername").resolves(null);
+
+    const result = await userService.updateUser(
+      1,
+      { role: "USER" },
+      { role: "ADMIN" }
+    );
+
+    expect(savedUser.calledOnce).to.be.true;
+    expect(result.role).to.equal("USER");
+  });
+
+  it("updates multiple fields successfully", async () => {
+    const savedUser = sinon.stub().resolvesThis();
+
+    sinon.stub(userRepository, "findById").resolves({
+      id: 1,
+      email: "test@mail.com",
+      username: "oldUser",
+      role: "USER",
+      save: savedUser,
+    });
+
+    sinon.stub(userRepository, "findByEmail").resolves(null);
+    sinon.stub(userRepository, "findByUsername").resolves(null);
+
+    const result = await userService.updateUser(
+      1,
+      { role: "ADMIN" },
+      { email: "new@mail.com", username: "newUser", role: "ADMIN" }
+    );
+
+    expect(savedUser.calledOnce).to.be.true;
+    expect(result.email).to.equal("new@mail.com");
+    expect(result.username).to.equal("newUser");
+    expect(result.role).to.equal("ADMIN");
+  });
+
+  it("returns unchanged user if no data provided", async () => {
+    const savedUser = sinon.stub().resolvesThis();
+
+    sinon.stub(userRepository, "findById").resolves({
+      id: 1,
+      email: "test@mail.com",
+      username: "testUser",
+      role: "USER",
+      save: savedUser,
+    });
+
+    const result = await userService.updateUser(1, { role: "USER" }, {});
+
+    expect(savedUser.calledOnce).to.be.true;
+    expect(result.email).to.equal("test@mail.com");
+    expect(result.username).to.equal("testUser");
+    expect(result.role).to.equal("USER");
   });
 
   it("deletes user successfully", async () => {
