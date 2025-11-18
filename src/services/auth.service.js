@@ -25,12 +25,12 @@ class AuthService {
     async login(email, password) {
         const user = await userRepository.findByEmail(email);
         if (!user) {
-            throw new Error("Invalid credentials");
+            throw new Error("Wrong email!");
         }
 
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (!passwordMatch) {
-            throw new Error("Invalid credentials");
+            throw new Error("Wrong password!");
         }
 
         const token = JwtUtil.sign({ id: user.id, email: user.email, role: user.role });
