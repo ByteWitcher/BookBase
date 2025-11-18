@@ -3,7 +3,6 @@ import sinon from "sinon";
 import authService from "../../src/services/auth.service.js";
 import userRepository from "../../src/repositories/user.repository.js";
 import bcrypt from "bcryptjs";
-import JwtUtil from "../../src/utils/jwt.js";
 
 describe("login()", () => {
 
