@@ -1,4 +1,4 @@
-import userRepository from "../repositories/user.repository.js";
+import userRepository from '../repositories/user.repository.js';
 
 class UserService {
     getUserById(id) {
@@ -20,26 +20,28 @@ class UserService {
     async updateUser(id, req, data) {
         const user = await userRepository.findById(id);
         if (!user) {
-            throw new Error("User not found");
+            throw new Error('User not found');
         }
 
         if (data.email && data.email !== user.email) {
             const existingEmail = await userRepository.findByEmail(data.email);
             if (existingEmail) {
-                throw new Error("Email already in use");
+                throw new Error('Email already in use');
             }
             user.email = data.email;
         }
 
         if (data.username && data.username !== user.username) {
-            const existingUsername = await userRepository.findByUsername(data.username);
+            const existingUsername = await userRepository.findByUsername(
+                data.username
+            );
             if (existingUsername) {
-                throw new Error("Username already in use");
+                throw new Error('Username already in use');
             }
             user.username = data.username;
         }
 
-        if (data.role && req && req.role === "ADMIN") {
+        if (data.role && req && req.role === 'ADMIN') {
             user.role = data.role;
         }
 
@@ -49,7 +51,7 @@ class UserService {
     async deleteUser(id) {
         const user = await userRepository.findById(id);
         if (!user) {
-            throw new Error("User not found");
+            throw new Error('User not found');
         }
         await userRepository.delete(id);
     }
