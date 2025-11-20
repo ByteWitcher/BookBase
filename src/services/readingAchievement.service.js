@@ -1,6 +1,6 @@
-import ReadingAchievementRepository from '../repositories/ReadingAchievementRepository.js';
-import ReadingSessionRepository from '../repositories/ReadingSessionRepository.js';
-import WeeklyReadingSummaryRepository from '../repositories/WeeklyReadingSummaryRepository.js';
+import ReadingAchievementRepository from '../repositories/readingAchievement.repository.js';
+import ReadingSessionRepository from '../repositories/readingSession.repository.js';
+import WeeklyReadingSummaryRepository from '../repositories/weeklyReadingSummary.repository.js';
 
 const STREAK_CODES = [
   { code: 'STREAK_3', label: '3-Day Reading Streak', length: 3 },
@@ -122,6 +122,42 @@ class ReadingAchievementService {
       ) return true;
     }
     return false;
+  }
+
+  /**
+   * Get achievements with filtering, sorting, and pagination
+   * @param {Object} options - { where, limit, offset, order }
+   * @returns {Promise<Array>}
+   */
+  async getAchievements(options = {}) {
+    return await ReadingAchievementRepository.findAll(options);
+  }
+
+  /**
+   * Get all achievements for a user
+   * @param {string} userId
+   * @returns {Promise<Array>}
+   */
+  async getAchievementsByUser(userId) {
+    return await ReadingAchievementRepository.findAllByUser(userId);
+  }
+
+  /**
+   * Get achievement by id
+   * @param {string} id
+   * @returns {Promise<Object|null>}
+   */
+  async getAchievementById(id) {
+    return await ReadingAchievementRepository.findById(id);
+  }
+
+  /**
+   * Delete achievement by id
+   * @param {string} id
+   * @returns {Promise<boolean>}
+   */
+  async deleteAchievement(id) {
+    return await ReadingAchievementRepository.delete(id);
   }
 }
 

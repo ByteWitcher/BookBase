@@ -1,5 +1,5 @@
 import models from '../entities/index.js';
-import ReadingSessionRepository from '../repositories/ReadingSessionRepository.js';
+import ReadingSessionRepository from '../repositories/readingSession.repository.js';
 
 const { Book } = models;
 

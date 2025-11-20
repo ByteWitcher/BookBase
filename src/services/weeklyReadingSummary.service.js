@@ -1,5 +1,5 @@
-import WeeklyReadingSummaryRepository from '../repositories/WeeklyReadingSummaryRepository.js';
-import ReadingSessionRepository from '../repositories/ReadingSessionRepository.js';
+import WeeklyReadingSummaryRepository from '../repositories/weeklyReadingSummary.repository.js';
+import ReadingSessionRepository from '../repositories/readingSession.repository.js';
 
 class WeeklyReadingSummaryService {
   async createSummary(data) {

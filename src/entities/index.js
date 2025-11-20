@@ -1,9 +1,9 @@
 import sequelize from '../config/database.js';
-import initUser from './User.js';
-import initBook from './Book.js';
-import initReadingSession from './ReadingSession.js';
-import initReadingAchievement from './ReadingAchievement.js';
-import initWeeklyReadingSummary from './WeeklyReadingSummary.js';
+import initUser from './user.entity.js';
+import initBook from './book.entity.js';
+import initReadingSession from './readingSession.entity.js';
+import initReadingAchievement from './readingAchievement.entity.js';
+import initWeeklyReadingSummary from './weeklyReadingSummary.entity.js';
 
 const models = {};
 
