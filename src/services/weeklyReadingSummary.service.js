@@ -3,7 +3,6 @@ import ReadingSessionRepository from '../repositories/readingSession.repository.
 
 class WeeklyReadingSummaryService {
   async createSummary(data) {
-    
     // Directly create a summary (expects all fields in data)
     return await WeeklyReadingSummaryRepository.create(data);
   }

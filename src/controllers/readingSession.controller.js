@@ -35,6 +35,7 @@ export default {
 	/**
 	 * Update a reading session
 	 */
+    // TODO: ensure that only the owner/admins can update
 	async updateSession(req, res) {
 		try {
 			const { id } = req.params;
@@ -49,6 +50,7 @@ export default {
 	/**
 	 * Delete a reading session
 	 */
+    // TODO: ensure that only the owner/admins can delete
 	async deleteSession(req, res) {
 		try {
 			const { id } = req.params;
