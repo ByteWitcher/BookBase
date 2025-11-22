@@ -3,7 +3,6 @@ import Book from '../entities/book.entity.js';
 
 class ReviewService {
 
-  // Créer une review
   async createReview(userId, bookId, rating, comment) {
     if (rating < 1 || rating > 5) {
       throw new Error('Rating must be between 1 and 5');
@@ -28,7 +27,6 @@ class ReviewService {
     return review;
   }
 
-  // Mettre à jour une review
   async updateReview(reviewId, userId, data) {
     const review = await reviewRepository.getReviewById(reviewId);
     if (!review) throw new Error('Review not found');
@@ -41,13 +39,11 @@ class ReviewService {
     }
 
     const updated = await reviewRepository.updateReview(reviewId, data);
-
     await this.recalculateBookRating(review.bookId);
 
     return updated;
   }
 
-  // Supprimer une review
   async deleteReview(reviewId, userId, isAdmin = false) {
     const review = await reviewRepository.getReviewById(reviewId);
     if (!review) throw new Error('Review not found');
@@ -65,27 +61,26 @@ class ReviewService {
     };
   }
 
-  // Reviews d’un livre
   async getBookReviews(bookId, pagination = {}) {
     const book = await Book.findByPk(bookId);
     if (!book) throw new Error('Book not found');
 
     const result = await reviewRepository.getBookReviews(bookId, pagination);
+    const limit = pagination.limit || 10;
+    const offset = pagination.offset || 0;
 
     return {
       reviews: result.rows,
       total: result.count,
-      page: Math.floor((pagination.offset || 0) / (pagination.limit || 10)) + 1,
-      totalPages: Math.ceil(result.count / (pagination.limit || 10))
+      page: Math.floor(offset / limit) + 1,
+      totalPages: result.count > 0 ? Math.ceil(result.count / limit) : 0  // ✅ Corrigé
     };
   }
 
-  // Review d'un user pour un livre
   async getUserReview(userId, bookId) {
     return await reviewRepository.getUserReview(userId, bookId);
   }
 
-  // Recalcul du rating
   async recalculateBookRating(bookId) {
     const { averageRating, totalReviews } =
       await reviewRepository.calculateAverageRating(bookId);
@@ -98,15 +93,16 @@ class ReviewService {
     return { averageRating, totalReviews };
   }
 
-  // Reviews d’un utilisateur
   async getUserReviews(userId, pagination = {}) {
     const result = await reviewRepository.getUserReviews(userId, pagination);
+    const limit = pagination.limit || 10;
+    const offset = pagination.offset || 0;
 
     return {
       reviews: result.rows,
       total: result.count,
-      page: Math.floor((pagination.offset || 0) / (pagination.limit || 10)) + 1,
-      totalPages: Math.ceil(result.count / (pagination.limit || 10))
+      page: Math.floor(offset / limit) + 1,
+      totalPages: result.count > 0 ? Math.ceil(result.count / limit) : 0  // ✅ Corrigé
     };
   }
 }

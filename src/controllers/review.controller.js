@@ -1,4 +1,3 @@
-// controllers/review.controller.js
 import reviewService from '../services/review.service.js';
 
 class ReviewController {
@@ -23,9 +22,13 @@ class ReviewController {
         data: review
       });
     } catch (error) {
-      const statusCode = error.message.includes('not found') ? 404 : 
-                        error.message.includes('cannot') ? 403 : 
-                        error.message.includes('already') ? 409 : 400;
+      // ✅ Gestion d'erreurs améliorée
+      let statusCode = 500;
+      if (error.message.includes('not found')) statusCode = 404;
+      else if (error.message.includes('cannot')) statusCode = 403;
+      else if (error.message.includes('already')) statusCode = 409;  // ✅ Fonctionne maintenant
+      else if (error.message.includes('Rating must be')) statusCode = 400;
+      
       res.status(statusCode).json({
         success: false,
         error: error.message
@@ -58,8 +61,11 @@ class ReviewController {
         data: review
       });
     } catch (error) {
-      const statusCode = error.message.includes('not found') ? 404 : 
-                        error.message.includes('not authorized') ? 403 : 400;
+      let statusCode = 500;
+      if (error.message.includes('not found')) statusCode = 404;
+      else if (error.message.includes('not authorized')) statusCode = 403;
+      else if (error.message.includes('Rating must be')) statusCode = 400;
+      
       res.status(statusCode).json({
         success: false,
         error: error.message
@@ -77,11 +83,14 @@ class ReviewController {
       
       res.status(200).json({
         success: true,
-        message: result.message
+        message: result.message,
+        data: { reviewId }  // ✅ Ajouté pour cohérence
       });
     } catch (error) {
-      const statusCode = error.message.includes('not found') ? 404 : 
-                        error.message.includes('not authorized') ? 403 : 400;
+      let statusCode = 500;
+      if (error.message.includes('not found')) statusCode = 404;
+      else if (error.message.includes('not authorized')) statusCode = 403;
+      
       res.status(statusCode).json({
         success: false,
         error: error.message
@@ -103,12 +112,16 @@ class ReviewController {
         pagination: {
           page: result.page,
           limit,
+          offset,
           total: result.total,
           totalPages: result.totalPages
         }
       });
     } catch (error) {
-      res.status(error.message.includes('not found') ? 404 : 500).json({
+      let statusCode = 500;
+      if (error.message.includes('not found')) statusCode = 404;
+      
+      res.status(statusCode).json({
         success: false,
         error: error.message
       });

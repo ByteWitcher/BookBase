@@ -11,7 +11,7 @@ const Review = sequelize.define('Review', {
     type: DataTypes.FLOAT,
     allowNull: false,
     validate: {
-      min: 0,
+      min: 1,
       max: 5,
     },
   },
@@ -36,9 +36,7 @@ const Review = sequelize.define('Review', {
     }
   }
 }, {
-  timestamps: true,
-  updatedAt: true,
-  createdAt: 'createdAt',
+  timestamps: true, 
   tableName: 'reviews',
   indexes: [
     {
@@ -48,17 +46,9 @@ const Review = sequelize.define('Review', {
   ]
 });
 
-// Déclaration des associations
 Review.associate = (models) => {
-  Review.belongsTo(models.User, { 
-    foreignKey: 'userId', 
-    as: 'user' 
-  });
-  
-  Review.belongsTo(models.Book, { 
-    foreignKey: 'bookId', 
-    as: 'book' 
-  });
+  Review.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
+  Review.belongsTo(models.Book, { foreignKey: 'bookId', as: 'book' });
 };
 
 export default Review;

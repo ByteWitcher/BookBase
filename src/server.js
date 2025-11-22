@@ -52,7 +52,6 @@ export class Server {
 
         // LIKE ROUTES
         app.post("/books/:id/like", authMiddleware, (req, res) => likeController.likeBook(req, res));
-        app.delete("/books/:id/like", authMiddleware, (req, res) => likeController.unlikeBook(req, res));
         app.get("/books/:id/likes", (req, res) => likeController.getBookLikes(req, res));
 
         //  REVIEW ROUTES

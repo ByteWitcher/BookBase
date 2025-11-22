@@ -6,22 +6,19 @@ import sequelize from '../config/database.js';
 
 class ReviewRepository {
   
-   // Créer une review
-
+  // Créer une review
   async createReview(data) {
     try {
       return await Review.create(data);
     } catch (error) {
       if (error.name === 'SequelizeUniqueConstraintError') {
-        throw new Error('You already reviewed this book');
+        throw new Error('Review already exists for this book');
       }
       throw error;
     }
   }
 
-  
-   // Mettre à jour une review
-   
+  // Mettre à jour une review
   async updateReview(reviewId, data) {
     const [updated] = await Review.update(data, {
       where: { id: reviewId }
@@ -34,19 +31,15 @@ class ReviewRepository {
     return await this.getReviewById(reviewId);
   }
 
-  
-   // Supprimer une review
-   
+  // Supprimer une review
   async deleteReview(reviewId) {
     const deleted = await Review.destroy({
       where: { id: reviewId }
     });
-    return deleted;
+    return deleted > 0;  // ✅ Retourne boolean
   }
 
-  
-   // Récupérer les reviews d'un livre
-   
+  // Récupérer les reviews d'un livre
   async getBookReviews(bookId, { limit = 10, offset = 0 } = {}) {
     return await Review.findAndCountAll({
       where: { bookId },
@@ -63,18 +56,14 @@ class ReviewRepository {
     });
   }
 
-  
-   // Récupérer la review d'un utilisateur pour un livre
-   
+  // Récupérer la review d'un utilisateur pour un livre
   async getUserReview(userId, bookId) {
     return await Review.findOne({
       where: { userId, bookId }
     });
   }
 
-  
-   // Récupérer une review par son ID
-   
+  // Récupérer une review par son ID
   async getReviewById(reviewId) {
     return await Review.findByPk(reviewId, {
       include: [
@@ -92,9 +81,7 @@ class ReviewRepository {
     });
   }
 
-  
-    // Calculer la moyenne des ratings d'un livre
-
+  // Calculer la moyenne des ratings d'un livre
   async calculateAverageRating(bookId) {
     const result = await Review.findOne({
       where: { bookId },
@@ -106,14 +93,13 @@ class ReviewRepository {
     });
     
     return {
-      averageRating: parseFloat(result?.avgRating) || 0,
+      // ✅ Arrondi à 1 décimale
+      averageRating: Math.round((parseFloat(result?.avgRating) || 0) * 10) / 10,
       totalReviews: parseInt(result?.totalReviews) || 0
     };
   }
 
-  
-   //  Récupérer toutes les reviews d'un utilisateur
-   
+  // Récupérer toutes les reviews d'un utilisateur
   async getUserReviews(userId, { limit = 10, offset = 0 } = {}) {
     return await Review.findAndCountAll({
       where: { userId },

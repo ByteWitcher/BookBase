@@ -1,4 +1,3 @@
-// controllers/favorite.controller.js
 import favoriteService from '../services/favorite.service.js';
 
 class FavoriteController {
@@ -15,7 +14,13 @@ class FavoriteController {
         data: { bookId: result.bookId }
       });
     } catch (error) {
-      res.status(error.message.includes('not found') ? 404 : 400).json({
+      // ✅ Gestion d'erreurs améliorée avec 500 pour erreurs inattendues
+      let statusCode = 500;
+      if (error.message.includes('not found')) statusCode = 404;
+      else if (error.message.includes('already')) statusCode = 409;
+      else if (error.message.includes('not available')) statusCode = 400;
+      
+      res.status(statusCode).json({
         success: false,
         error: error.message
       });
@@ -35,7 +40,11 @@ class FavoriteController {
         data: { bookId: result.bookId }
       });
     } catch (error) {
-      res.status(error.message.includes('not found') ? 404 : 400).json({
+      // ✅ Gestion d'erreurs améliorée
+      let statusCode = 500;
+      if (error.message.includes('not found')) statusCode = 404;
+      
+      res.status(statusCode).json({
         success: false,
         error: error.message
       });
@@ -53,7 +62,13 @@ class FavoriteController {
       res.status(200).json({
         success: true,
         data: result.favorites,
-        pagination: { limit, offset, total: result.total }
+        pagination: { 
+          page: result.page,          
+          limit, 
+          offset, 
+          total: result.total,
+          totalPages: result.totalPages
+        }
       });
     } catch (error) {
       res.status(500).json({

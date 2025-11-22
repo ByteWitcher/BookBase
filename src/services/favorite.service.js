@@ -3,7 +3,6 @@ import Book from '../entities/book.entity.js';
 
 class FavoriteService {
 
-  // Ajouter un livre aux favoris
   async addToFavorites(userId, bookId) {
     const book = await Book.findByPk(bookId);
     if (!book) throw new Error('Book not found');
@@ -17,7 +16,6 @@ class FavoriteService {
     };
   }
 
-  // Retirer un livre des favoris
   async removeFromFavorites(userId, bookId) {
     const deleted = await favoriteRepository.removeFavorite(userId, bookId);
 
@@ -31,19 +29,20 @@ class FavoriteService {
     };
   }
 
-  // Récupérer les favoris de l'utilisateur
   async getUserFavorites(userId, pagination = {}) {
     const result = await favoriteRepository.getUserFavorites(userId, pagination);
-
+    
+    const limit = pagination.limit || 10;
+    const offset = pagination.offset || 0;
+    
     return {
-      favorites: result.rows.map(fav => fav.book),
-      total: result.count,
-      page: Math.floor((pagination.offset || 0) / (pagination.limit || 10)) + 1,
-      totalPages: Math.ceil(result.count / (pagination.limit || 10))
+      favorites: result.rows.map(fav => fav.book), 
+      total: result.count,                           
+      page: Math.floor(offset / limit) + 1,         
+      totalPages: result.count > 0 ? Math.ceil(result.count / limit) : 0  // ✅ Corrigé
     };
   }
 
-  // Vérifier si un livre est favori
   async isFavorited(userId, bookId) {
     return await favoriteRepository.isFavorited(userId, bookId);
   }
