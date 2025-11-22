@@ -23,11 +23,6 @@ const BookType = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    isActive: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: true,
-    },
   },
   { timestamps: true, updatedAt: false }
 );

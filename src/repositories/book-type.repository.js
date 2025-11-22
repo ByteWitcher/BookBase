@@ -1,10 +1,14 @@
-import models from "../entities/index.js";
+import db from "../entities/index.js";
 
-const { BookType } = models;
+const { BookType } = db;
 
 class BookTypeRepository {
   create(data) {
     return BookType.create(data);
+  }
+
+  findById(id) {
+    return BookType.findByPk(id);
   }
 
   findById(id) {

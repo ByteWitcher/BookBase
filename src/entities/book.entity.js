@@ -9,6 +9,7 @@ const Book = sequelize.define(
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
     },
+    // hash of title+authors+edition+language
     fingerprint: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -59,11 +60,6 @@ const Book = sequelize.define(
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
       defaultValue: 0,
-    },
-    isActive: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
     },
   },
   { timestamps: true, updatedAt: false }

@@ -1,17 +1,36 @@
 import sequelize from "../config/database.js";
-import Book from "./Book.js";
-import BookType from "./BookType.js";
-import BookGenre from "./BookGenre.js";
+import { readdirSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 
-const models = {
-  Book,
-  BookType,
-  BookGenre,
-};
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
-Object.values(models)
-  .filter((model) => typeof model.associate === "function")
-  .forEach((model) => model.associate(models));
+/**
+ * Make VSCode understand the structure of db
+ * This gives Sequelize method IntelliSense without defining fields.
+ *
+ * @type {Record<string, import("sequelize").ModelCtor<import("sequelize").Model>>}
+ */
 
-export { sequelize };
-export default models;
+const db = {};
+
+// import all models
+const files = readdirSync(__dirname).filter(
+  (file) => file !== "index.js" && file.endsWith(".js")
+);
+
+for (const file of files) {
+  const model = (await import(join(__dirname, file))).default;
+  db[model.name] = model;
+}
+
+// apply associations
+Object.values(db).forEach((model) => {
+  if (model.associate) {
+    model.associate(db);
+  }
+});
+
+db.sequelize = sequelize;
+
+export default db;

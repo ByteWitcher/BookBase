@@ -1,6 +1,6 @@
-import models from "../entities/index.js";
+import db from "../entities/index.js";
 
-const { Book, BookGenre } = models;
+const { Book, BookGenre } = db;
 
 class BookRepository {
   create(data) {
