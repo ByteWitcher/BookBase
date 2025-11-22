@@ -15,22 +15,31 @@ class BookRepository {
     return Book.findOne({ where: { fingerprint } });
   }
 
-  findByBookTypeId(bookTypeId) {
-    return Book.findAll({ where: { bookTypeId } });
+  async findFiltered({ where, include, limit, offset, order }) {
+    return Book.findAndCountAll({
+      where,
+      include,
+      limit,
+      offset,
+      order,
+      distinct: true,
+    });
   }
 
-  findByBookGenreId(bookGenreId) {
-    return Book.findAll({
+  countByBookTypeId(bookTypeId) {
+    return Book.count({ distinct: true, where: { bookTypeId } });
+  }
+
+  countByBookGenreId(bookGenreId) {
+    return Book.count({
+      distinct: true,
       include: {
         model: BookGenre,
         as: "bookGenres",
         where: { id: bookGenreId },
+        required: true,
       },
     });
-  }
-
-  findAll() {
-    return Book.findAll();
   }
 
   delete(id) {

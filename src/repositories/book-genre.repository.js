@@ -19,6 +19,10 @@ class BookGenreRepository {
     return BookGenre.findOne({ where: { name } });
   }
 
+  findByIds(ids) {
+    return BookGenre.findAll({ where: { ids } });
+  }
+
   findAll() {
     return BookGenre.findAll();
   }

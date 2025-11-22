@@ -11,10 +11,6 @@ class BookTypeRepository {
     return BookType.findByPk(id);
   }
 
-  findById(id) {
-    return BookType.findByPk(id);
-  }
-
   findByCode(code) {
     return BookType.findOne({ where: { code } });
   }
