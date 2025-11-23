@@ -3,7 +3,7 @@ import ReadingSessionRepository from '../repositories/readingSession.repository.
 
 const { Book } = models;
 
-function validateSessionInput({ book, startPage, endPage, startTime, endTime }) {
+export function validateSessionInput({ book, startPage, endPage, startTime, endTime }) {
   if (!book) throw new Error('Book not found');
   if (startPage < 1 || endPage > book.pageNumbers || startPage > endPage) {
     throw new Error('Invalid page range for this book');

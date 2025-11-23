@@ -17,6 +17,10 @@ export default function initBook(sequelize) {
         defaultValue: 100, // stub default
         validate: { min: 1 }
       },
+      title: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },  
     },
     {
       sequelize,

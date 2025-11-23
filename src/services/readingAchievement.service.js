@@ -17,6 +17,7 @@ const ACHIEVEMENTS = {
 };
 
 class ReadingAchievementService {
+  
   async checkAndUnlockAchievements(userId, sessionData) {
     const unlocked = await ReadingAchievementRepository.findAllByUser(userId);
     const unlockedCodes = new Set(unlocked.map(a => a.code));
@@ -99,8 +100,11 @@ class ReadingAchievementService {
   async checkTenBooksFinished(userId) {
     const sessions = await ReadingSessionRepository.findAllByUser(userId);
     const finishedBooks = new Set();
+    // Import Book model here to avoid circular dependency at top
+    const { Book } = (await import('../entities/index.js')).default;
     for (const s of sessions) {
-      if (s.endPage === s.book?.pageNumbers) {
+      const book = await Book.findByPk(s.bookId);
+      if (book && s.endPage === book.pageNumbers) {
         finishedBooks.add(s.bookId);
       }
     }
@@ -108,6 +112,7 @@ class ReadingAchievementService {
   }
 
   async checkConsistentReader(userId) {
+    // Check if user has summaries for at least 4 consecutive weeks
     const summaries = await WeeklyReadingSummaryRepository.findAllByUser(userId);
     const weeks = summaries.map(s => s.weekStart).sort();
     for (let i = 0; i < weeks.length - 3; i++) {

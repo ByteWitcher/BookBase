@@ -19,6 +19,19 @@ function getCurrentWeekRange() {
 }
 
 export default {
+		/**
+		 * Admin: Generate current week's summaries for all users
+		 */
+		async generateCurrentWeekSummariesForAllUsers(req, res) {
+			try {
+				// TODO: restrict to admin or authorized users
+				const { weekStart, weekEnd } = getCurrentWeekRange();
+				const results = await WeeklyReadingSummaryService.generateCurrentWeekSummariesForAllUsers(weekStart, weekEnd);
+				res.json(results);
+			} catch (err) {
+				res.status(400).json({ error: err.message });
+			}
+		},
 	/**
 	 * Get/generate current week's summary for authenticated user (on demand)
 	 */

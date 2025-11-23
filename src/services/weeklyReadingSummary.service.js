@@ -1,7 +1,26 @@
+import models from '../entities/index.js';
 import WeeklyReadingSummaryRepository from '../repositories/weeklyReadingSummary.repository.js';
 import ReadingSessionRepository from '../repositories/readingSession.repository.js';
+import models from '../entities/index.js';
 
 class WeeklyReadingSummaryService {
+
+    /**
+     * Generate current week's summaries for all users
+     * @param {string} weekStart - ISO date string
+     * @param {string} weekEnd - ISO date string
+     * @returns {Promise<Array>} Array of generated/updated summaries
+     */
+    async generateCurrentWeekSummariesForAllUsers(weekStart, weekEnd) {
+      // Get all user IDs (assumes User model is available via models)
+      const users = await models.User.findAll({ attributes: ['id'] });
+      const results = [];
+      for (const user of users) {
+        const summary = await this.generateSummaryFromSessions(user.id, weekStart, weekEnd);
+        results.push(summary);
+      }
+      return results;
+    }
   async createSummary(data) {
     // Directly create a summary (expects all fields in data)
     return await WeeklyReadingSummaryRepository.create(data);
