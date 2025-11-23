@@ -27,7 +27,7 @@ class BookGenreRepository {
     return BookGenre.findAll();
   }
 
-  delete(id) {
+  deleteById(id) {
     return BookGenre.destroy({ where: { id } });
   }
 }

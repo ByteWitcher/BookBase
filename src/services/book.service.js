@@ -1,6 +1,8 @@
 import bookRepository from "../repositories/book.repository";
 import bookTypeService from "./book-type.service";
 import bookGenreService from "./book-genre.service";
+import bookRequestService from "./book-request.service";
+import crypto from "crypto";
 import { Op } from "sequelize";
 import db from "../entities/index.js";
 
@@ -10,12 +12,15 @@ class BookService {
   async createBook(userId, data) {
     const { bookGenreIds, ...bookData } = data;
 
-    const fingerprint = this.buildFingerprint(bookData);
+    const fingerprint = this._buildBookFingerprint(bookData);
 
     const existingFingerprint = await bookRepository.findByFingerprint(
       fingerprint
     );
-    if (existingFingerprint) throw new Error("Book already exists");
+    if (existingFingerprint) {
+      if (existingFingerprint.isActive) throw new Error("Book already exists");
+      else throw new Error("Book already submitted and is pending approval");
+    }
 
     const existingBookType = await bookTypeService.getBookTypeById(
       bookData.bookTypeId
@@ -33,8 +38,9 @@ class BookService {
     const book = await bookRepository.create({
       ...bookData,
       fingerprint,
-      uploaderId: userId,
-      approverId: userId,
+      isActive: bookData.isActive !== undefined ? bookData.isActive : true,
+      userId,
+      adminId: userId,
     });
 
     await book.setBookGenres(bookGenreIds);
@@ -50,17 +56,21 @@ class BookService {
       page = 1,
       pageSize = 10,
       title,
+      authors,
+      edition,
       languageCode,
       bookTypeId,
+      userId,
+      adminId,
       bookGenreIds,
-      minRating,
-      maxRating,
-      minLikes,
-      maxLikes,
-      minPages,
-      maxPages,
       startDate,
       endDate,
+      minPages,
+      maxPages,
+      minLikes,
+      maxLikes,
+      minRating,
+      maxRating,
       sortBy = "createdAt",
       sortOrder = "DESC",
     } = query;
@@ -76,6 +86,16 @@ class BookService {
       where.title = { [Op.iLike]: `%${title}%` };
     }
 
+    if (authors) {
+      where.authors = {
+        [Op.overlap]: Array.isArray(authors) ? authors : [authors],
+      };
+    }
+
+    if (edition) {
+      where.edition = { [Op.iLike]: `%${edition}%` };
+    }
+
     if (languageCode) {
       where.languageCode = languageCode;
     }
@@ -84,16 +104,18 @@ class BookService {
       where.bookTypeId = bookTypeId;
     }
 
-    if (minRating || maxRating) {
-      where.rating = {};
-      if (minRating) where.rating[Op.gte] = Number(minRating);
-      if (maxRating) where.rating[Op.lte] = Number(maxRating);
+    if (userId) {
+      where.userId = userId;
     }
 
-    if (minLikes || maxLikes) {
-      where.likes = {};
-      if (minLikes) where.likes[Op.gte] = Number(minLikes);
-      if (maxLikes) where.likes[Op.lte] = Number(maxLikes);
+    if (adminId) {
+      where.adminId = adminId;
+    }
+
+    if (startDate || endDate) {
+      where.releaseDate = {};
+      if (startDate) where.releaseDate[Op.gte] = new Date(startDate);
+      if (endDate) where.releaseDate[Op.lte] = new Date(endDate);
     }
 
     if (minPages || maxPages) {
@@ -102,10 +124,16 @@ class BookService {
       if (maxPages) where.pageCount[Op.lte] = Number(maxPages);
     }
 
-    if (startDate || endDate) {
-      where.releaseDate = {};
-      if (startDate) where.releaseDate[Op.gte] = new Date(startDate);
-      if (endDate) where.releaseDate[Op.lte] = new Date(endDate);
+    if (minLikes || maxLikes) {
+      where.likes = {};
+      if (minLikes) where.likes[Op.gte] = Number(minLikes);
+      if (maxLikes) where.likes[Op.lte] = Number(maxLikes);
+    }
+
+    if (minRating || maxRating) {
+      where.rating = {};
+      if (minRating) where.rating[Op.gte] = Number(minRating);
+      if (maxRating) where.rating[Op.lte] = Number(maxRating);
     }
 
     // INCLUDE
@@ -135,10 +163,10 @@ class BookService {
 
     const validSortFields = [
       "title",
-      "rating",
-      "likes",
-      "pageCount",
       "releaseDate",
+      "pageCount",
+      "likes",
+      "rating",
       "createdAt",
     ];
 
@@ -183,15 +211,14 @@ class BookService {
     const allowed = [
       "title",
       "authors",
-      "languageCode",
       "edition",
       "description",
-      "pageCount",
+      "languageCode",
       "releaseDate",
+      "pageCount",
       "s3PdfUrl",
       "bookTypeId",
     ];
-
     const updates = {};
 
     allowed.forEach((field) => {
@@ -217,7 +244,7 @@ class BookService {
     }
 
     Object.assign(book, updates);
-    const fingerprint = this.buildFingerprint(book);
+    const fingerprint = this._buildBookFingerprint(book);
     const existingFingerprint = await bookRepository.findByFingerprint(
       fingerprint
     );
@@ -228,20 +255,42 @@ class BookService {
     return book;
   }
 
-  async deleteBook(id) {
+  async activateBook(id) {
+    const book = await bookRepository.findById(id);
+    if (!book) throw new Error("Book not found");
+    book.isActive = true;
+    return await book.save();
+  }
+
+  async deleteBookById(id) {
     const book = await bookRepository.findById(id);
     if (!book) throw new Error("Book not found");
     await book.setBookGenres([]);
-    return await bookRepository.delete(id);
+    const bookRequest = book.getBookRequest();
+    if (bookRequest)
+      await bookRequestService.updateBookRequestWithBookAttributes(
+        bookRequest,
+        {
+          title: book.title,
+          authors: book.authors,
+          edition: book.edition,
+          languageCode: book.languageCode,
+        }
+      );
+    return await bookRepository.deleteById(id);
   }
 
-  buildFingerprint(book) {
+  _buildBookFingerprint(book) {
     let fingerprint = book.title;
     book.authors.array.forEach((element) => {
       fingerprint += element;
     });
     fingerprint = fingerprint + book.edition + book.languageCode;
-    return fingerprint;
+
+    return crypto
+      .createHash("sha256")
+      .update(fingerprint, "utf8")
+      .digest("hex");
   }
 }
 

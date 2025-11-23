@@ -34,9 +34,10 @@ class BookGenreService {
   async updateBookGenre(id, data) {
     const bookGenre = await bookGenreRepository.findById(id);
     if (!bookGenre) throw new Error("Book genre not found");
-    const allowed = ["code", "name", "description"];
 
+    const allowed = ["code", "name", "description"];
     const updates = {};
+
     allowed.forEach((field) => {
       if (data[field] !== undefined && data[field] !== bookGenre[field]) {
         updates[field] = data[field];
@@ -60,7 +61,7 @@ class BookGenreService {
     return await bookGenre.update(updates);
   }
 
-  async deleteBookGenre(id) {
+  async deleteBookGenreById(id) {
     const bookGenre = await bookGenreRepository.findById(id);
     if (!bookGenre) throw new Error("Book genre not found");
     const count = await bookService.countBooksByBookGenreId(id);
@@ -68,7 +69,7 @@ class BookGenreService {
       throw new Error(
         "This book genre cannot be deleted because it has associated books"
       );
-    return await bookGenreRepository.delete(id);
+    return await bookGenreRepository.deleteById(id);
   }
 }
 

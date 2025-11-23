@@ -42,7 +42,7 @@ class BookRepository {
     });
   }
 
-  delete(id) {
+  deleteById(id) {
     return Book.destroy({ where: { id } });
   }
 }

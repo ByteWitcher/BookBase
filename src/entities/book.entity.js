@@ -23,11 +23,6 @@ const Book = sequelize.define(
       type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: false,
     },
-    languageCode: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: { is: /^[a-z]{2}$/ },
-    },
     edition: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -36,13 +31,28 @@ const Book = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    pageCount: {
-      type: DataTypes.INTEGER.UNSIGNED,
+    languageCode: {
+      type: DataTypes.STRING,
       allowNull: false,
+      validate: { is: /^[a-z]{2}$/ },
     },
     releaseDate: {
       type: DataTypes.DATE,
       allowNull: false,
+    },
+    pageCount: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+    },
+    likes: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    rating: {
+      type: DataTypes.FLOAT.UNSIGNED,
+      allowNull: false,
+      defaultValue: 0.0,
     },
     s3PdfUrl: {
       type: DataTypes.STRING,
@@ -51,15 +61,10 @@ const Book = sequelize.define(
         isUrl: true,
       },
     },
-    rating: {
-      type: DataTypes.FLOAT.UNSIGNED,
+    isActive: {
+      type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: 0.0,
-    },
-    likes: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      allowNull: false,
-      defaultValue: 0,
+      defaultValue: false,
     },
   },
   { timestamps: true, updatedAt: false }
@@ -72,8 +77,9 @@ Book.associate = (models) => {
     foreignKey: "bookId",
     as: "bookGenres",
   });
-  Book.belongsTo(models.User, { foreignKey: "uploaderId", as: "uploader" });
-  Book.belongsTo(models.User, { foreignKey: "approverId", as: "approver" });
+  Book.belongsTo(models.User, { foreignKey: "userId", as: "user" });
+  Book.belongsTo(models.User, { foreignKey: "adminId", as: "admin" });
+  Book.hasOne(models.BookRequest, { foreignKey: "bookId", as: "bookRequest" });
 };
 
 export default Book;

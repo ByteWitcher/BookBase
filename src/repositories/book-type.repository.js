@@ -23,7 +23,7 @@ class BookTypeRepository {
     return BookType.findAll();
   }
 
-  delete(id) {
+  deleteById(id) {
     return BookType.destroy({ where: { id } });
   }
 }

@@ -32,8 +32,8 @@ class BookTypeService {
     if (!bookType) throw new Error("Book type not found");
 
     const allowed = ["code", "name", "description"];
-
     const updates = {};
+
     allowed.forEach((field) => {
       if (data[field] !== undefined && data[field] !== bookType[field]) {
         updates[field] = data[field];
@@ -57,7 +57,7 @@ class BookTypeService {
     return await bookType.update(updates);
   }
 
-  async deleteBookType(id) {
+  async deleteBookTypeById(id) {
     const bookType = await bookTypeRepository.findById(id);
     if (!bookType) throw new Error("Book type not found");
     const count = await bookService.countBooksByBookTypeId(id);
@@ -65,7 +65,7 @@ class BookTypeService {
       throw new Error(
         "This book type cannot be deleted because it has associated books"
       );
-    return await bookTypeRepository.delete(id);
+    return await bookTypeRepository.deleteById(id);
   }
 }
 
