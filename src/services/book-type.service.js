@@ -1,12 +1,13 @@
 import bookTypeRepository from "../repositories/book-type.repository";
 import bookService from "./book.service";
+import HttpError from "../utils/http-error.util";
 
 class BookTypeService {
   async createBookType(data) {
     const existingCode = await bookTypeRepository.findByCode(data.code);
-    if (existingCode) throw new Error("Code already exists");
+    if (existingCode) throw new HttpError("Code already exists", 400);
     const existingName = await bookTypeRepository.findByName(data.name);
-    if (existingName) throw new Error("Name already exists");
+    if (existingName) throw new HttpError("Name already exists", 400);
 
     return await bookTypeRepository.create(data);
   }
@@ -29,7 +30,7 @@ class BookTypeService {
 
   async updateBookType(id, data) {
     const bookType = await bookTypeRepository.findById(id);
-    if (!bookType) throw new Error("Book type not found");
+    if (!bookType) throw new HttpError("Book type not found", 404);
 
     const allowed = ["code", "name", "description"];
     const updates = {};
@@ -43,14 +44,14 @@ class BookTypeService {
     if (updates.code !== undefined) {
       const existingCode = await bookTypeRepository.findByCode(updates.code);
       if (existingCode && existingCode.id !== id) {
-        throw new Error("Code already exists");
+        throw new HttpError("Code already exists", 400);
       }
     }
 
     if (updates.name !== undefined) {
       const existingName = await bookTypeRepository.findByName(updates.name);
       if (existingName && existingName.id !== id) {
-        throw new Error("Name already exists");
+        throw new HttpError("Name already exists", 400);
       }
     }
 
@@ -59,12 +60,14 @@ class BookTypeService {
 
   async deleteBookTypeById(id) {
     const bookType = await bookTypeRepository.findById(id);
-    if (!bookType) throw new Error("Book type not found");
+    if (!bookType) throw new HttpError("Book type not found", 404);
     const count = await bookService.countBooksByBookTypeId(id);
     if (count)
-      throw new Error(
-        "This book type cannot be deleted because it has associated books"
+      throw new HttpError(
+        "This book type cannot be deleted because it has associated books",
+        400
       );
+
     return await bookTypeRepository.deleteById(id);
   }
 }

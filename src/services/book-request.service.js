@@ -1,6 +1,7 @@
 import db from "../entities/index.js";
 import bookRequestRepository from "../repositories/book-request.repositroy.js";
 import bookService from "./book.service.js";
+import HttpError from "../utils/http-error.util.js";
 
 const { Book } = db;
 
@@ -87,7 +88,7 @@ class BookRequestService {
 
   async updateBookRequest(id, data) {
     const bookRequest = await bookRequestRepository.findById(id);
-    if (!bookRequest) throw Error("Book request not found");
+    if (!bookRequest) throw new HttpError("Book request not found", 404);
 
     const allowed = ["comment"];
     const updates = {};
@@ -116,9 +117,9 @@ class BookRequestService {
 
   async deleteBookRequestById(id) {
     const bookRequest = bookRequestRepository.findById(id);
-    if (!bookRequest) throw new Error("Book request not found");
+    if (!bookRequest) throw new HttpError("Book request not found", 404);
     const book = bookService.getBookById(bookRequest.bookId);
-    if (book) throw new Error("Book still exists");
+    if (book) throw new HttpError("Book still exists", 400);
     return await bookRequestRepository.deleteById(id);
   }
 }
