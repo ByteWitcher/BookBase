@@ -6,12 +6,17 @@ import crypto from "crypto";
 import { Op } from "sequelize";
 import db from "../entities/index.js";
 import HttpError from "../utils/http-error.util";
+import uploadFileToS3 from "../utils/s3.util";
 
 const { BookType, BookGenre } = db;
 
 class BookService {
   async createBook(userId, data) {
-    const { bookGenreIds, ...bookData } = data;
+    const { bookGenreIds, pdfFile, ...bookData } = data;
+
+    if (!pdfFile) {
+      throw new HttpError("PDF file is required", 400);
+    }
 
     const fingerprint = this._buildBookFingerprint(bookData);
 
@@ -31,29 +36,44 @@ class BookService {
     const existingBookType = await bookTypeService.getBookTypeById(
       bookData.bookTypeId
     );
-    if (!existingBookType) throw new HttpError("Book type not found", 404);
 
-    const existingBookGenres = await bookGenreService.getBookGenresByIds(
+    const existingBookGenres = await bookGenreService.findBookGenresByIds(
       bookGenreIds
     );
 
     if (existingBookGenres.length !== bookGenreIds.length)
       throw new HttpError("One or more book genres are not found", 404);
 
-    // add s3PdfUrl later
+    const s3PdfUrl = await uploadFileToS3(
+      pdfFile.buffer,
+      pdfFile.originalname,
+      pdfFile.mimetype
+    );
+
     const book = await bookRepository.create({
       ...bookData,
       fingerprint,
+      s3PdfUrl,
       isActive: bookData.isActive !== undefined ? bookData.isActive : true,
       userId,
-      adminId: userId,
+      adminId: bookData.adminId !== undefined ? bookData.adminId : userId,
     });
 
     await book.setBookGenres(bookGenreIds);
+    book.bookType = existingBookType;
+    book.bookGenres = existingBookGenres;
     return book;
   }
 
   async getBookById(id) {
+    const book = await bookRepository.findById(id);
+    if (!book) throw new HttpError("Book not found", 404);
+    book.bookType = await book.getBookType();
+    book.bookGenres = await book.getBookGenres();
+    return book;
+  }
+
+  async findBookById(id) {
     return await bookRepository.findById(id);
   }
 
@@ -234,14 +254,11 @@ class BookService {
     });
 
     if (updates.bookTypeId !== undefined) {
-      const existingBookType = await bookTypeService.getBookTypeById(
-        updates.bookTypeId
-      );
-      if (!existingBookType) throw new HttpError("Book type not found", 404);
+      await bookTypeService.getBookTypeById(updates.bookTypeId);
     }
 
     if (bookGenreIds !== undefined) {
-      const existingBookGenres = await bookGenreService.getBookGenresByIds(
+      const existingBookGenres = await bookGenreService.findBookGenresByIds(
         bookGenreIds
       );
 
@@ -257,14 +274,18 @@ class BookService {
     if (existingFingerprint) throw new HttpError("Book already exists", 400);
 
     await book.save();
-    await book.setBookGenres(bookGenreIds);
+    if (bookGenreIds !== undefined) {
+      await book.setBookGenres(bookGenreIds);
+    }
+    book.bookType = await book.getBookType();
+    book.bookGenres = await book.getBookGenres();
     return book;
   }
 
-  async activateBook(id) {
+  async activateBook(userId, id) {
     const book = await bookRepository.findById(id);
-    if (!book) throw new HttpError("Book not found", 404);
     book.isActive = true;
+    book.adminId = userId;
     return await book.save();
   }
 

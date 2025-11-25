@@ -44,6 +44,8 @@ BookRequest.associate = (models) => {
     foreignKey: "bookId",
     as: "book",
   });
+  BookRequest.belongsTo(models.User, { foreignKey: "userId", as: "user" });
+  BookRequest.belongsTo(models.User, { foreignKey: "adminId", as: "admin" });
 };
 
 export default BookRequest;

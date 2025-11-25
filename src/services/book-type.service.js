@@ -13,15 +13,21 @@ class BookTypeService {
   }
 
   async getBookTypeById(id) {
-    return await bookTypeRepository.findById(id);
+    const bookType = await bookTypeRepository.findById(id);
+    if (!bookType) throw new HttpError("Book type not found", 404);
+    return bookType;
   }
 
   async getBookTypeByCode(code) {
-    return await bookTypeRepository.findByCode(code);
+    const bookType = await bookTypeRepository.findByCode(code);
+    if (!bookType) throw new HttpError("Book type not found", 404);
+    return bookType;
   }
 
   async getBookTypeByName(name) {
-    return await bookTypeRepository.findByName(name);
+    const bookType = await bookTypeRepository.findByName(name);
+    if (!bookType) throw new HttpError("Book type not found", 404);
+    return bookType;
   }
 
   async getBookTypes() {

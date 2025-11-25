@@ -13,18 +13,24 @@ class BookGenreService {
   }
 
   async getBookGenreById(id) {
-    return await bookGenreRepository.findById(id);
+    const bookGenre = await bookGenreRepository.findById(id);
+    if (!bookGenre) throw new HttpError("Book genre not found", 404);
+    return bookGenre;
   }
 
   async getBookGenreByCode(code) {
-    return await bookGenreRepository.findByCode(code);
+    const bookGenre = await bookGenreRepository.findByCode(code);
+    if (!bookGenre) throw new HttpError("Book genre not found", 404);
+    return bookGenre;
   }
 
   async getBookGenreByName(name) {
-    return await bookGenreRepository.findByName(name);
+    const bookGenre = await bookGenreRepository.findByName(name);
+    if (!bookGenre) throw new HttpError("Book genre not found", 404);
+    return bookGenre;
   }
 
-  async getBookGenresByIds(ids) {
+  async findBookGenresByIds(ids) {
     return await bookGenreRepository.findByIds(ids);
   }
 

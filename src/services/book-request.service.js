@@ -6,19 +6,28 @@ import HttpError from "../utils/http-error.util.js";
 const { Book } = db;
 
 class BookRequestService {
-  async createBookRequest(data) {
+  async createBookRequest(userId, data) {
     data.isActive = false;
-    const book = await bookService.createBook(data);
-    return await bookRequestRepository.create({
+    data.adminId = null;
+    const book = await bookService.createBook(userId, data);
+    const bookRequest = await bookRequestRepository.create({
       bookId: book.id,
+      userId,
     });
+    bookRequest.book = book;
+    return bookRequest;
   }
 
-  async getBookRequestById(id) {
-    return await bookRequestRepository.findById(id);
+  async getBookRequestById(user, id) {
+    const bookRequest = await bookRequestRepository.findById(id);
+    if (!bookRequest) throw new HttpError("Book request not found", 404);
+    if (user.role !== "ADMIN" && bookRequest.userId !== user.id)
+      throw new HttpError("You are not allowed to view this book request", 403);
+    bookRequest.book = await bookRequest.getBook();
+    return bookRequest;
   }
 
-  async getBookRequestsFiltered(query) {
+  async getBookRequestsFiltered(user, query) {
     const {
       page = 1,
       pageSize = 10,
@@ -36,16 +45,15 @@ class BookRequestService {
 
     const where = {};
 
+    if (user.role === "USER") {
+      where.userId = user.userId;
+    } else {
+      if (userId) where.userId = userId;
+      if (adminId) where.adminId = adminId;
+    }
+
     if (status) {
       where.status = status.toUpperCase();
-    }
-
-    if (userId) {
-      where.userId = userId;
-    }
-
-    if (adminId) {
-      where.adminId = adminId;
     }
 
     // INCLUDE
@@ -86,7 +94,7 @@ class BookRequestService {
     };
   }
 
-  async updateBookRequest(id, data) {
+  async updateBookRequest(userId, id, data) {
     const bookRequest = await bookRequestRepository.findById(id);
     if (!bookRequest) throw new HttpError("Book request not found", 404);
 
@@ -101,24 +109,28 @@ class BookRequestService {
 
     if (data.status && bookRequest.status === "PENDING") {
       updates.status = data.status;
-      if (updates.status === "APPROVED")
-        await bookService.activateBook(bookRequest.bookId);
-      else if (updates.status === "REJECTED")
+      if (updates.status === "APPROVED") {
+        await bookService.activateBook(userId, bookRequest.bookId);
+        updates.adminId = userId;
+      } else if (updates.status === "REJECTED") {
         await bookService.deleteBookById(bookRequest.bookId);
+        updates.adminId = userId;
+      }
     }
-
-    return await bookRequest.update(updates);
+    await bookRequest.update(updates);
+    bookRequest.book = await bookRequest.getBook();
+    return bookRequest;
   }
 
   async updateBookRequestWithBookAttributes(bookRequest, data) {
     data.bookId = null;
-    return await bookRequest.update(data);
+    await bookRequest.update(data);
   }
 
   async deleteBookRequestById(id) {
     const bookRequest = bookRequestRepository.findById(id);
     if (!bookRequest) throw new HttpError("Book request not found", 404);
-    const book = bookService.getBookById(bookRequest.bookId);
+    const book = bookService.findBookById(bookRequest.bookId);
     if (book) throw new HttpError("Book still exists", 400);
     return await bookRequestRepository.deleteById(id);
   }
