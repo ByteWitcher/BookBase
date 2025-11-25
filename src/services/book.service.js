@@ -309,7 +309,7 @@ class BookService {
 
   _buildBookFingerprint(book) {
     let fingerprint = book.title;
-    book.authors.array.forEach((element) => {
+    book.authors.forEach((element) => {
       fingerprint += element;
     });
     fingerprint = fingerprint + book.edition + book.languageCode;
