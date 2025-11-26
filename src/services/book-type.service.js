@@ -71,7 +71,7 @@ class BookTypeService {
     if (count)
       throw new HttpError(
         400,
-        "This book type cannot be deleted because it has associated books"
+        "This book type cannot be deleted because it has associated books",
       );
 
     return await bookTypeRepository.deleteById(id);

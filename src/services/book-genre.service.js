@@ -75,7 +75,7 @@ class BookGenreService {
     if (count)
       throw new HttpError(
         400,
-        "This book genre cannot be deleted because it has associated books"
+        "This book genre cannot be deleted because it has associated books",
       );
     return await bookGenreRepository.deleteById(id);
   }

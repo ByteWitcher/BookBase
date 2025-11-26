@@ -16,7 +16,7 @@ const db = {};
 
 // import all models
 const files = readdirSync(__dirname).filter(
-  (file) => file !== "index.js" && file.endsWith(".js")
+  (file) => file !== "index.js" && file.endsWith(".js"),
 );
 
 for (const file of files) {
@@ -34,4 +34,3 @@ Object.values(db).forEach((model) => {
 db.sequelize = sequelize;
 
 export default db;
-

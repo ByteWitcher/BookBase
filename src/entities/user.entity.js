@@ -38,7 +38,7 @@ const User = sequelize.define(
   {
     timestamps: true,
     updatedAt: false,
-  }
+  },
 );
 
 User.associate = (models) => {

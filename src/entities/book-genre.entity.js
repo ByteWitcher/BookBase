@@ -24,7 +24,7 @@ const BookGenre = sequelize.define(
       allowNull: false,
     },
   },
-  { timestamps: true, updatedAt: false }
+  { timestamps: true, updatedAt: false },
 );
 
 BookGenre.associate = (models) => {

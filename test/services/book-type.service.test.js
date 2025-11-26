@@ -234,7 +234,7 @@ describe("BookTypeService", () => {
         throw new Error("Expected error");
       } catch (err) {
         expect(err.message).to.equal(
-          "This book type cannot be deleted because it has associated books"
+          "This book type cannot be deleted because it has associated books",
         );
       }
     });

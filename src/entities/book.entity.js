@@ -67,7 +67,7 @@ const Book = sequelize.define(
       defaultValue: false,
     },
   },
-  { timestamps: true, updatedAt: false }
+  { timestamps: true, updatedAt: false },
 );
 
 Book.associate = (models) => {

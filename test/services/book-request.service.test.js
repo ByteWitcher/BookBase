@@ -35,7 +35,7 @@ describe("BookRequestService", () => {
       try {
         await bookRequestService.getBookRequestById(
           { role: "USER", id: "u1" },
-          "r1"
+          "r1",
         );
         throw new Error("Expected error");
       } catch (err) {
@@ -49,12 +49,12 @@ describe("BookRequestService", () => {
       try {
         await bookRequestService.getBookRequestById(
           { role: "USER", id: "u1" },
-          "r1"
+          "r1",
         );
         throw new Error("Expected error");
       } catch (err) {
         expect(err.message).to.equal(
-          "You are not allowed to view this book request"
+          "You are not allowed to view this book request",
         );
       }
     });
@@ -65,7 +65,7 @@ describe("BookRequestService", () => {
 
       const result = await bookRequestService.getBookRequestById(
         { role: "ADMIN", id: "admin1" },
-        "r1"
+        "r1",
       );
       expect(result).to.equal(fakeRequest);
     });
@@ -76,7 +76,7 @@ describe("BookRequestService", () => {
 
       const result = await bookRequestService.getBookRequestById(
         { role: "USER", id: "u1" },
-        "r1"
+        "r1",
       );
       expect(result).to.equal(fakeRequest);
     });
@@ -91,7 +91,7 @@ describe("BookRequestService", () => {
 
       const result = await bookRequestService.getBookRequestsFiltered(
         { role: "ADMIN" },
-        { page: 1, pageSize: 10 }
+        { page: 1, pageSize: 10 },
       );
 
       expect(result.totalItems).to.equal(2);
@@ -149,7 +149,7 @@ describe("BookRequestService", () => {
       const result = await bookRequestService.updateBookRequest(
         "admin1",
         "r1",
-        { status: "APPROVED" }
+        { status: "APPROVED" },
       );
 
       expect(result.status).to.equal("APPROVED");
@@ -173,7 +173,7 @@ describe("BookRequestService", () => {
       const result = await bookRequestService.updateBookRequest(
         "admin1",
         "r1",
-        { status: "REJECTED" }
+        { status: "REJECTED" },
       );
 
       expect(result.status).to.equal("REJECTED");
@@ -194,7 +194,7 @@ describe("BookRequestService", () => {
 
       await bookRequestService.updateBookRequestWithBookAttributes(
         fakeRequest,
-        { title: "New Book" }
+        { title: "New Book" },
       );
       expect(fakeRequest.title).to.equal("New Book");
       expect(fakeRequest.bookId).to.be.null;

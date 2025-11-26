@@ -50,7 +50,7 @@ class BookTypeController {
     try {
       const bookType = await BookTypeService.updateBookType(
         req.params.id,
-        req.body
+        req.body,
       );
       res.status(200).json(bookType);
     } catch (error) {

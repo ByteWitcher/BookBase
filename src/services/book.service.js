@@ -20,26 +20,24 @@ class BookService {
 
     const fingerprint = this._buildBookFingerprint(bookData);
 
-    const existingFingerprint = await bookRepository.findByFingerprint(
-      fingerprint
-    );
+    const existingFingerprint =
+      await bookRepository.findByFingerprint(fingerprint);
     if (existingFingerprint) {
       if (existingFingerprint.isActive)
         throw new HttpError(400, "Book already exists");
       else
         throw new HttpError(
           400,
-          "Book already submitted and is pending approval"
+          "Book already submitted and is pending approval",
         );
     }
 
     const existingBookType = await bookTypeService.getBookTypeById(
-      bookData.bookTypeId
+      bookData.bookTypeId,
     );
 
-    const existingBookGenres = await bookGenreService.findBookGenresByIds(
-      bookGenreIds
-    );
+    const existingBookGenres =
+      await bookGenreService.findBookGenresByIds(bookGenreIds);
 
     if (existingBookGenres.length !== bookGenreIds.length)
       throw new HttpError(404, "One or more book genres are not found");
@@ -47,7 +45,7 @@ class BookService {
     const s3PdfUrl = await s3Utils.uploadFileToS3(
       pdfFile.buffer,
       fingerprint + ".pdf",
-      pdfFile.mimetype
+      pdfFile.mimetype,
     );
 
     let book = await bookRepository.create({
@@ -257,9 +255,8 @@ class BookService {
     }
 
     if (bookGenreIds !== undefined) {
-      const existingBookGenres = await bookGenreService.findBookGenresByIds(
-        bookGenreIds
-      );
+      const existingBookGenres =
+        await bookGenreService.findBookGenresByIds(bookGenreIds);
 
       if (existingBookGenres.length !== bookGenreIds.length)
         throw new HttpError(404, "One or more book genres are not found");
@@ -267,9 +264,8 @@ class BookService {
 
     Object.assign(book, updates);
     const fingerprint = this._buildBookFingerprint(book);
-    const existingFingerprint = await bookRepository.findByFingerprint(
-      fingerprint
-    );
+    const existingFingerprint =
+      await bookRepository.findByFingerprint(fingerprint);
     if (existingFingerprint && existingFingerprint.id !== book.id) {
       throw new HttpError(400, "Book already exists");
     }
@@ -308,7 +304,7 @@ class BookService {
           authors: book.authors,
           edition: book.edition,
           languageCode: book.languageCode,
-        }
+        },
       );
     return await bookRepository.deleteById(id);
   }

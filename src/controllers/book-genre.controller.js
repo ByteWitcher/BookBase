@@ -22,7 +22,7 @@ class BookGenreController {
   async getBookGenreByCode(req, res) {
     try {
       const bookGenre = await bookGenreService.getBookGenreByCode(
-        req.params.code
+        req.params.code,
       );
       res.status(200).json(bookGenre);
     } catch (error) {
@@ -33,7 +33,7 @@ class BookGenreController {
   async getBookGenreByName(req, res) {
     try {
       const bookGenre = await bookGenreService.getBookGenreByName(
-        req.params.name
+        req.params.name,
       );
       res.status(200).json(bookGenre);
     } catch (error) {
@@ -54,7 +54,7 @@ class BookGenreController {
     try {
       const bookGenre = await bookGenreService.updateBookGenre(
         req.params.id,
-        req.body
+        req.body,
       );
       res.status(200).json(bookGenre);
     } catch (error) {

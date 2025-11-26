@@ -44,14 +44,12 @@ describe("BookGenreService", () => {
     });
 
     it("creates book genre successfully", async () => {
-      const createStub = sinon
-        .stub(bookGenreRepository, "create")
-        .resolves({
-          id: "1",
-          code: "FIC",
-          name: "Fiction",
-          description: "desc",
-        });
+      const createStub = sinon.stub(bookGenreRepository, "create").resolves({
+        id: "1",
+        code: "FIC",
+        name: "Fiction",
+        description: "desc",
+      });
       sinon.stub(bookGenreRepository, "findByCode").resolves(null);
       sinon.stub(bookGenreRepository, "findByName").resolves(null);
 
@@ -256,7 +254,7 @@ describe("BookGenreService", () => {
         throw new Error("Expected error");
       } catch (err) {
         expect(err.message).to.equal(
-          "This book genre cannot be deleted because it has associated books"
+          "This book genre cannot be deleted because it has associated books",
         );
       }
     });

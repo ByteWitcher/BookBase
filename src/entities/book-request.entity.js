@@ -36,7 +36,7 @@ const BookRequest = sequelize.define(
       allowNull: true,
     },
   },
-  { timestamps: true, updatedAt: false }
+  { timestamps: true, updatedAt: false },
 );
 
 BookRequest.associate = (models) => {

@@ -9,7 +9,7 @@ class BookRequestController {
       };
       const bookRequest = await BookRequestService.createBookRequest(
         req.user.id,
-        data
+        data,
       );
       res.status(201).json(bookRequest);
     } catch (error) {
@@ -21,7 +21,7 @@ class BookRequestController {
     try {
       const bookRequest = await BookRequestService.getBookRequestById(
         req.user,
-        req.params.id
+        req.params.id,
       );
       res.status(200).json(bookRequest);
     } catch (error) {
@@ -33,7 +33,7 @@ class BookRequestController {
     try {
       const result = await BookRequestService.getBookRequestsFiltered(
         req.user,
-        req.query
+        req.query,
       );
       res.status(200).json(result);
     } catch (error) {
@@ -46,7 +46,7 @@ class BookRequestController {
       const bookRequest = await BookRequestService.updateBookRequest(
         req.user.id,
         req.params.id,
-        req.body
+        req.body,
       );
       res.status(200).json(bookRequest);
     } catch (error) {
