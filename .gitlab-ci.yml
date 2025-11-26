@@ -10,7 +10,7 @@ format-check:
   script:
     - npm ci
     - echo "Running Prettier format checks..."
-    - npx prettier . --write "src/**/*" "test/**/*"
+    - npx prettier "src/**/*" "test/**/*" --write
   only:
     - merge_requests
 
