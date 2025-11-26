@@ -247,4 +247,48 @@ describe('getUserBookProgress', () => {
     expect(bookFindStub).to.have.been.calledWith('book1');
     expect(bookFindStub).to.have.been.calledWith('book2');
   });
+
+  describe('getLeaderboard', () => {
+    const ReadingSessionService = readingSessionServiceModule.default;
+    const fakeLeaderboardRows = [
+      { userId: 'user1', totalPages: '100' },
+      { userId: 'user2', totalPages: '80' },
+      { userId: 'user3', totalPages: '50' }
+    ];
+    const fakeUsers = [
+      { id: 'user1', username: 'alice' },
+      { id: 'user2', username: 'bob' },
+      { id: 'user3', username: 'carol' }
+    ];
+    beforeEach(() => {
+      sinon.stub(models.User, 'findAll').resolves(fakeUsers);
+      if (!models.ReadingSession.sequelize) {
+        models.ReadingSession.sequelize = { QueryTypes: { SELECT: 'SELECT' } };
+      }
+      sinon.stub(models.ReadingSession.sequelize, 'query').resolves(fakeLeaderboardRows);
+    });
+    afterEach(() => {
+      sinon.restore();
+    });
+
+    it('should return leaderboard with userId, username, position, and totalPages', async () => {
+      const result = await ReadingSessionService.getLeaderboard(3);
+      expect(result).to.deep.equal([
+        { position: 1, userId: 'user1', username: 'alice', totalPages: 100 },
+        { position: 2, userId: 'user2', username: 'bob', totalPages: 80 },
+        { position: 3, userId: 'user3', username: 'carol', totalPages: 50 }
+      ]);
+      expect(models.ReadingSession.sequelize.query).to.have.been.called;
+      expect(models.User.findAll).to.have.been.calledWithMatch({ where: { id: ['user1', 'user2', 'user3'] } });
+    });
+
+    it('should handle missing usernames gracefully', async () => {
+      models.User.findAll.resolves([]); // No users found
+      models.ReadingSession.sequelize.query.resolves([{ userId: 'user1', totalPages: '100' }]);
+      const result = await ReadingSessionService.getLeaderboard(1);
+      expect(result).to.deep.equal([
+        { position: 1, userId: 'user1', username: null, totalPages: 100 }
+      ]);
+    });
+  });
 });
