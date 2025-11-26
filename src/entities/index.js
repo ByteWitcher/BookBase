@@ -35,21 +35,3 @@ db.sequelize = sequelize;
 
 export default db;
 
-// User.associate = (models) => {
-//   User.hasMany(models.BookRequest, {
-//     foreignKey: "userId",
-//     as: "bookRequests",
-//   });
-//   User.hasMany(models.BookRequest, {
-//     foreignKey: "adminId",
-//     as: "processedBookRequests",
-//   });
-//   User.hasMany(models.Book, {
-//     foreignKey: "userId",
-//     as: "books",
-//   });
-//   User.hasMany(models.Book, {
-//     foreignKey: "adminId",
-//     as: "processedBooks",
-//   });
-// };

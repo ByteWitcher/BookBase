@@ -1,4 +1,8 @@
 import express from "express";
+import authController from "./controllers/auth.controller.js";
+import userController from "./controllers/user.controller.js";
+import authMiddleware from "./middlewares/auth.middleware.js";
+import requireAdmin from "./middlewares/role.middleware.js";
 import sequelize from "./config/database.js";
 import upload from "./utils/file-uploader.util.js";
 import BookTypeController from "./controllers/book-type.controller.js";
@@ -12,13 +16,8 @@ export class Server {
 
     app.use(express.json());
 
-    // TEST USER INJECTION
-    app.use((req, res, next) => {
-      req.user = {
-        id: "d4f7a2b9-3c1e-4f6d-8b2e-91a7c6f5e4d2",
-        role: "ADMIN",
-      };
-      next();
+    app.get("/", (req, res) => {
+      res.send("Hello from BookBase!");
     });
 
     // DB CONNECTION TEST
@@ -39,9 +38,50 @@ export class Server {
       process.exit(1);
     }
 
-    app.get("/", (req, res) => {
-      res.send("Hello to BookBase!");
-    });
+    // AUTH CONTROLLER
+    app.post("/auth/register", (req, res) => authController.register(req, res));
+    app.post("/auth/login", (req, res) => authController.login(req, res));
+    app.post("/auth/reset-password", (req, res) =>
+      authController.resetPassword(req, res),
+    );
+
+    // USER CONTROLLER
+    app.get("/users/me", authMiddleware, (req, res) =>
+      userController.getMe(req, res),
+    );
+    app.get("/users/id/:id", authMiddleware, requireAdmin, (req, res) =>
+      userController.getUserById(req, res),
+    );
+    app.get("/users/email/:email", authMiddleware, requireAdmin, (req, res) =>
+      userController.getUserByEmail(req, res),
+    );
+    app.get(
+      "/users/username/:username",
+      authMiddleware,
+      requireAdmin,
+      (req, res) => userController.getUserByUsername(req, res),
+    );
+    app.get("/users", authMiddleware, (req, res) =>
+      userController.getUsers(req, res),
+    );
+    app.put("/users/me/update", authMiddleware, (req, res) =>
+      userController.updateMe(req, res),
+    );
+    app.put(
+      "/users/username/:username/update",
+      authMiddleware,
+      requireAdmin,
+      (req, res) => userController.updateUser(req, res),
+    );
+    app.delete("/users/me/delete", authMiddleware, (req, res) =>
+      userController.deleteMe(req, res),
+    );
+    app.delete(
+      "/users/username/:username/delete",
+      authMiddleware,
+      requireAdmin,
+      (req, res) => userController.deleteUser(req, res),
+    );
 
     // BOOK-TYPE ROUTES
     app.post("/book-types", (req, res) =>
@@ -126,3 +166,4 @@ export class Server {
 }
 
 export default Server;
+
