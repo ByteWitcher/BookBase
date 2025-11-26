@@ -1,7 +1,16 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import * as chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
+import sinonChai from 'sinon-chai';
+import sinon from 'sinon';
 import * as readingSessionServiceModule from '../src/services/readingSession.service.js';
 import ReadingSessionRepository from '../src/repositories/readingSession.repository.js';
 import models from '../src/entities/index.js';
+
+// Configure Chai plugins
+chai.use(chaiAsPromised);
+chai.use(sinonChai);
+
+const { expect } = chai;
 
 describe('validateSessionInput', () => {
   // Get the function from the imported module
@@ -66,17 +75,16 @@ describe('createSession', () => {
       endPage: 10
     };
     beforeEach(() => {
-      bookStub = vi.spyOn(models.Book, 'findByPk');
+      bookStub = sinon.stub(models.Book, 'findByPk');
     });
     afterEach(() => {
-      bookStub.mockRestore();
-      vi.restoreAllMocks();
+      sinon.restore();
     });
 
     it('should create a session if input is valid', async () => {
-      bookStub.mockResolvedValue({ id: 'book1', pageNumbers: 200 });
+      bookStub.resolves({ id: 'book1', pageNumbers: 200 });
       // Mock the repository create method
-      const repoCreate = vi.spyOn(ReadingSessionRepository, 'create').mockResolvedValue(fakeSession);
+      const repoCreate = sinon.stub(ReadingSessionRepository, 'create').resolves(fakeSession);
       const result = await readingSessionServiceModule.default.createSession({
         userId: 'user1',
         bookId: 'book1',
@@ -85,10 +93,9 @@ describe('createSession', () => {
         startPage: 1,
         endPage: 10
       });
-      expect(result).toEqual(fakeSession);
-      expect(bookStub).toHaveBeenCalledWith('book1');
-      expect(repoCreate).toHaveBeenCalled();
-      repoCreate.mockRestore();
+      expect(result).to.deep.equal(fakeSession);
+      expect(bookStub).to.have.been.calledWith('book1');
+      expect(repoCreate).to.have.been.called;
     });
 });
 
@@ -105,28 +112,25 @@ describe('updateSession', () => {
     endPage: 10
   };
   beforeEach(() => {
-    repoFindStub = vi.spyOn(ReadingSessionRepository, 'findById').mockResolvedValue(fakeSession);
-    bookStub = vi.spyOn(models.Book, 'findByPk').mockResolvedValue({ id: 'book1', pageNumbers: 200 });
-    repoUpdateStub = vi.spyOn(ReadingSessionRepository, 'update').mockResolvedValue({ ...fakeSession, startPage: 2 });
+    repoFindStub = sinon.stub(ReadingSessionRepository, 'findById').resolves(fakeSession);
+    bookStub = sinon.stub(models.Book, 'findByPk').resolves({ id: 'book1', pageNumbers: 200 });
+    repoUpdateStub = sinon.stub(ReadingSessionRepository, 'update').resolves({ ...fakeSession, startPage: 2 });
   });
   afterEach(() => {
-    repoFindStub.mockRestore();
-    bookStub.mockRestore();
-    repoUpdateStub.mockRestore();
-    vi.restoreAllMocks();
+    sinon.restore();
   });
 
   it('should update a session if input is valid', async () => {
     const result = await ReadingSessionService.updateSession('session1', { startPage: 2 });
-    expect(result).toEqual({ ...fakeSession, startPage: 2 });
-    expect(repoFindStub).toHaveBeenCalledWith('session1');
-    expect(bookStub).toHaveBeenCalledWith('book1');
-    expect(repoUpdateStub).toHaveBeenCalled();
+    expect(result).to.deep.equal({ ...fakeSession, startPage: 2 });
+    expect(repoFindStub).to.have.been.calledWith('session1');
+    expect(bookStub).to.have.been.calledWith('book1');
+    expect(repoUpdateStub).to.have.been.called;
   });
 
   it('should throw if session not found', async () => {
-    repoFindStub.mockResolvedValueOnce(null);
-    await expect(ReadingSessionService.updateSession('badid', { startPage: 2 })).rejects.toThrow('Session not found');
+    repoFindStub.onFirstCall().resolves(null);
+    await expect(ReadingSessionService.updateSession('badid', { startPage: 2 })).to.be.rejectedWith('Session not found');
   });
 });
 
@@ -134,17 +138,16 @@ describe('deleteSession', () => {
   let repoDeleteStub;
   const ReadingSessionService = readingSessionServiceModule.default;
   beforeEach(() => {
-    repoDeleteStub = vi.spyOn(ReadingSessionRepository, 'delete').mockResolvedValue(true);
+    repoDeleteStub = sinon.stub(ReadingSessionRepository, 'delete').resolves(true);
   });
   afterEach(() => {
-    repoDeleteStub.mockRestore();
-    vi.restoreAllMocks();
+    sinon.restore();
   });
 
   it('should call repository delete and return result', async () => {
     const result = await ReadingSessionService.deleteSession('session1');
-    expect(result).toBe(true);
-    expect(repoDeleteStub).toHaveBeenCalledWith('session1');
+    expect(result).to.equal(true);
+    expect(repoDeleteStub).to.have.been.calledWith('session1');
   });
 });
 
@@ -152,17 +155,16 @@ describe('getSessionById', () => {
   let repoFindStub;
   const ReadingSessionService = readingSessionServiceModule.default;
   beforeEach(() => {
-    repoFindStub = vi.spyOn(ReadingSessionRepository, 'findById').mockResolvedValue({ id: 'session1' });
+    repoFindStub = sinon.stub(ReadingSessionRepository, 'findById').resolves({ id: 'session1' });
   });
   afterEach(() => {
-    repoFindStub.mockRestore();
-    vi.restoreAllMocks();
+    sinon.restore();
   });
 
   it('should return the session if found', async () => {
     const result = await ReadingSessionService.getSessionById('session1');
-    expect(result).toEqual({ id: 'session1' });
-    expect(repoFindStub).toHaveBeenCalledWith('session1');
+    expect(result).to.deep.equal({ id: 'session1' });
+    expect(repoFindStub).to.have.been.calledWith('session1');
   });
 });
 
@@ -174,17 +176,16 @@ describe('getAllSessionsByUser', () => {
     { id: 'session2', userId: 'user1', bookId: 'book2' }
   ];
   beforeEach(() => {
-    repoFindAllStub = vi.spyOn(ReadingSessionRepository, 'findAllByUser').mockResolvedValue(fakeSessions);
+    repoFindAllStub = sinon.stub(ReadingSessionRepository, 'findAllByUser').resolves(fakeSessions);
   });
   afterEach(() => {
-    repoFindAllStub.mockRestore();
-    vi.restoreAllMocks();
+    sinon.restore();
   });
 
   it('should return all sessions for a user', async () => {
     const result = await ReadingSessionService.getAllSessionsByUser('user1');
-    expect(result).toEqual(fakeSessions);
-    expect(repoFindAllStub).toHaveBeenCalledWith('user1');
+    expect(result).to.deep.equal(fakeSessions);
+    expect(repoFindAllStub).to.have.been.calledWith('user1');
   });
 });
 
@@ -197,23 +198,22 @@ describe('getLatestSessionByUserAndBook', () => {
     { id: 'session3', userId: 'user1', bookId: 'book2', endTime: '2025-11-22T11:00:00Z' }
   ];
   beforeEach(() => {
-    repoFindAllStub = vi.spyOn(ReadingSessionRepository, 'findAllByUser').mockResolvedValue(fakeSessions);
+    repoFindAllStub = sinon.stub(ReadingSessionRepository, 'findAllByUser').resolves(fakeSessions);
   });
   afterEach(() => {
-    repoFindAllStub.mockRestore();
-    vi.restoreAllMocks();
+    sinon.restore();
   });
 
   it('should return the latest session for a user and book', async () => {
     const result = await ReadingSessionService.getLatestSessionByUserAndBook('user1', 'book1');
-    expect(result).toEqual(fakeSessions[1]); // session2 is latest for book1
-    expect(repoFindAllStub).toHaveBeenCalledWith('user1');
+    expect(result).to.deep.equal(fakeSessions[1]); // session2 is latest for book1
+    expect(repoFindAllStub).to.have.been.calledWith('user1');
   });
 
   it('should return null if no session for the book', async () => {
     const result = await ReadingSessionService.getLatestSessionByUserAndBook('user1', 'book3');
-    expect(result).toBeNull();
-    expect(repoFindAllStub).toHaveBeenCalledWith('user1');
+    expect(result).to.be.null;
+    expect(repoFindAllStub).to.have.been.calledWith('user1');
   });
 });
 
@@ -230,23 +230,21 @@ describe('getUserBookProgress', () => {
     book2: { id: 'book2', title: 'Book Two' }
   };
   beforeEach(() => {
-    repoFindAllStub = vi.spyOn(ReadingSessionRepository, 'findAllByUser').mockResolvedValue(fakeSessions);
-    bookFindStub = vi.spyOn(models.Book, 'findByPk').mockImplementation(async (id) => fakeBooks[id]);
+    repoFindAllStub = sinon.stub(ReadingSessionRepository, 'findAllByUser').resolves(fakeSessions);
+    bookFindStub = sinon.stub(models.Book, 'findByPk').callsFake(async (id) => fakeBooks[id]);
   });
   afterEach(() => {
-    repoFindAllStub.mockRestore();
-    bookFindStub.mockRestore();
-    vi.restoreAllMocks();
+    sinon.restore();
   });
 
   it('should return farthest page for each book the user read', async () => {
     const result = await ReadingSessionService.getUserBookProgress('user1');
-    expect(result).toEqual([
+    expect(result).to.deep.equal([
       { bookId: 'book1', title: 'Book One', farthestPage: 25 },
       { bookId: 'book2', title: 'Book Two', farthestPage: 15 }
     ]);
-    expect(repoFindAllStub).toHaveBeenCalledWith('user1');
-    expect(bookFindStub).toHaveBeenCalledWith('book1');
-    expect(bookFindStub).toHaveBeenCalledWith('book2');
+    expect(repoFindAllStub).to.have.been.calledWith('user1');
+    expect(bookFindStub).to.have.been.calledWith('book1');
+    expect(bookFindStub).to.have.been.calledWith('book2');
   });
 });

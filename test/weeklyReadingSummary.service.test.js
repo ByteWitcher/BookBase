@@ -1,25 +1,32 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-
+import * as chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
+import sinonChai from 'sinon-chai';
+import sinon from 'sinon';
 import WeeklyReadingSummaryService from '../src/services/weeklyReadingSummary.service.js';
 import WeeklyReadingSummaryRepository from '../src/repositories/weeklyReadingSummary.repository.js';
 import ReadingSessionRepository from '../src/repositories/readingSession.repository.js';
+
+// Configure Chai plugins
+chai.use(chaiAsPromised);
+chai.use(sinonChai);
+
+const { expect } = chai;
 
 describe('WeeklyReadingSummaryService', () => {
   describe('createSummary', () => {
     let repoCreateStub;
     const fakeSummary = { id: 's1', userId: 'u1', weekStart: '2025-11-17', weekEnd: '2025-11-23' };
     beforeEach(() => {
-      repoCreateStub = vi.spyOn(WeeklyReadingSummaryRepository, 'create').mockResolvedValue(fakeSummary);
+      repoCreateStub = sinon.stub(WeeklyReadingSummaryRepository, 'create').resolves(fakeSummary);
     });
 
     afterEach(() => {
-      repoCreateStub.mockRestore();
-      vi.restoreAllMocks();
+      sinon.restore();
     });
     it('should create a summary', async () => {
       const result = await WeeklyReadingSummaryService.createSummary(fakeSummary);
-      expect(result).toEqual(fakeSummary);
-      expect(repoCreateStub).toHaveBeenCalledWith(fakeSummary);
+      expect(result).to.deep.equal(fakeSummary);
+      expect(repoCreateStub).to.have.been.calledWith(fakeSummary);
     });
   });
 
@@ -27,16 +34,15 @@ describe('WeeklyReadingSummaryService', () => {
     let repoFindByIdStub;
     const fakeSummary = { id: 's1', userId: 'u1' };
     beforeEach(() => {
-      repoFindByIdStub = vi.spyOn(WeeklyReadingSummaryRepository, 'findById').mockResolvedValue(fakeSummary);
+      repoFindByIdStub = sinon.stub(WeeklyReadingSummaryRepository, 'findById').resolves(fakeSummary);
     });
     afterEach(() => {
-      repoFindByIdStub.mockRestore();
-      vi.restoreAllMocks();
+      sinon.restore();
     });
     it('should return the summary by id', async () => {
       const result = await WeeklyReadingSummaryService.getSummaryById('s1');
-      expect(result).toEqual(fakeSummary);
-      expect(repoFindByIdStub).toHaveBeenCalledWith('s1');
+      expect(result).to.deep.equal(fakeSummary);
+      expect(repoFindByIdStub).to.have.been.calledWith('s1');
     });
   });
 
@@ -44,32 +50,30 @@ describe('WeeklyReadingSummaryService', () => {
     let repoUpdateStub;
     const fakeSummary = { id: 's1', totalPagesRead: 100 };
     beforeEach(() => {
-      repoUpdateStub = vi.spyOn(WeeklyReadingSummaryRepository, 'update').mockResolvedValue(fakeSummary);
+      repoUpdateStub = sinon.stub(WeeklyReadingSummaryRepository, 'update').resolves(fakeSummary);
     });
     afterEach(() => {
-      repoUpdateStub.mockRestore();
-      vi.restoreAllMocks();
+      sinon.restore();
     });
     it('should update the summary', async () => {
       const result = await WeeklyReadingSummaryService.updateSummary('s1', { totalPagesRead: 100 });
-      expect(result).toEqual(fakeSummary);
-      expect(repoUpdateStub).toHaveBeenCalledWith('s1', { totalPagesRead: 100 });
+      expect(result).to.deep.equal(fakeSummary);
+      expect(repoUpdateStub).to.have.been.calledWith('s1', { totalPagesRead: 100 });
     });
   });
 
   describe('deleteSummary', () => {
     let repoDeleteStub;
     beforeEach(() => {
-      repoDeleteStub = vi.spyOn(WeeklyReadingSummaryRepository, 'delete').mockResolvedValue(true);
+      repoDeleteStub = sinon.stub(WeeklyReadingSummaryRepository, 'delete').resolves(true);
     });
     afterEach(() => {
-      repoDeleteStub.mockRestore();
-      vi.restoreAllMocks();
+      sinon.restore();
     });
     it('should delete the summary by id', async () => {
       const result = await WeeklyReadingSummaryService.deleteSummary('s1');
-      expect(result).toBe(true);
-      expect(repoDeleteStub).toHaveBeenCalledWith('s1');
+      expect(result).to.equal(true);
+      expect(repoDeleteStub).to.have.been.calledWith('s1');
     });
   });
 
@@ -80,16 +84,15 @@ describe('WeeklyReadingSummaryService', () => {
       { id: 's2', userId: 'u1' }
     ];
     beforeEach(() => {
-      repoFindAllByUserStub = vi.spyOn(WeeklyReadingSummaryRepository, 'findAllByUser').mockResolvedValue(fakeSummaries);
+      repoFindAllByUserStub = sinon.stub(WeeklyReadingSummaryRepository, 'findAllByUser').resolves(fakeSummaries);
     });
     afterEach(() => {
-      repoFindAllByUserStub.mockRestore();
-      vi.restoreAllMocks();
+      sinon.restore();
     });
     it('should return all summaries for a user', async () => {
       const result = await WeeklyReadingSummaryService.getAllSummariesByUser('u1');
-      expect(result).toEqual(fakeSummaries);
-      expect(repoFindAllByUserStub).toHaveBeenCalledWith('u1');
+      expect(result).to.deep.equal(fakeSummaries);
+      expect(repoFindAllByUserStub).to.have.been.calledWith('u1');
     });
   });
 
@@ -100,16 +103,15 @@ describe('WeeklyReadingSummaryService', () => {
       { id: 's2', userId: 'u2' }
     ];
     beforeEach(() => {
-      repoFindAllStub = vi.spyOn(WeeklyReadingSummaryRepository, 'findAll').mockResolvedValue(fakeSummaries);
+      repoFindAllStub = sinon.stub(WeeklyReadingSummaryRepository, 'findAll').resolves(fakeSummaries);
     });
     afterEach(() => {
-      repoFindAllStub.mockRestore();
-      vi.restoreAllMocks();
+      sinon.restore();
     });
     it('should return all summaries with options', async () => {
       const result = await WeeklyReadingSummaryService.getAllSummaries({ where: { userId: 'u1' } });
-      expect(result).toEqual(fakeSummaries);
-      expect(repoFindAllStub).toHaveBeenCalledWith({ where: { userId: 'u1' } });
+      expect(result).to.deep.equal(fakeSummaries);
+      expect(repoFindAllStub).to.have.been.calledWith({ where: { userId: 'u1' } });
     });
   });
 
@@ -134,48 +136,44 @@ describe('WeeklyReadingSummaryService', () => {
         ];
         beforeEach(() => {
             // Mock ReadingSessionRepository
-            sessionRepoStub = vi.spyOn(ReadingSessionRepository, 'findAllByUser').mockResolvedValue(sessions);
+            sessionRepoStub = sinon.stub(ReadingSessionRepository, 'findAllByUser').resolves(sessions);
             // Mock WeeklyReadingSummaryRepository
-            findByWeekStub = vi.spyOn(WeeklyReadingSummaryRepository, 'findByWeekForUser');
-            createStub = vi.spyOn(WeeklyReadingSummaryRepository, 'create');
-            updateStub = vi.spyOn(WeeklyReadingSummaryRepository, 'update');
+            findByWeekStub = sinon.stub(WeeklyReadingSummaryRepository, 'findByWeekForUser');
+            createStub = sinon.stub(WeeklyReadingSummaryRepository, 'create');
+            updateStub = sinon.stub(WeeklyReadingSummaryRepository, 'update');
         });
         afterEach(() => {
-            sessionRepoStub.mockRestore();
-            findByWeekStub.mockRestore();
-            createStub.mockRestore();
-            updateStub.mockRestore();
-            vi.restoreAllMocks();
+            sinon.restore();
         });
 
         it('should create a new summary if none exists', async () => {
-            findByWeekStub.mockResolvedValue(null);
-            createStub.mockImplementation(async (data) => ({ ...data, id: 'summary1' }));
+            findByWeekStub.resolves(null);
+            createStub.callsFake(async (data) => ({ ...data, id: 'summary1' }));
             const result = await WeeklyReadingSummaryService.generateSummaryFromSessions(userId, weekStart, weekEnd);
-            expect(result).toMatchObject({
-            userId,
-            weekStart,
-            weekEnd,
-            totalReadingMinutes: 90,
-            totalPagesRead: 30,
-            averageSpeed: expect.any(Number)
+            expect(result).to.include({
+                userId,
+                weekStart,
+                weekEnd,
+                totalReadingMinutes: 90,
+                totalPagesRead: 30
             });
-            expect(createStub).toHaveBeenCalled();
-            expect(updateStub).not.toHaveBeenCalled();
+            expect(result.averageSpeed).to.be.a('number');
+            expect(createStub).to.have.been.called;
+            expect(updateStub).to.not.have.been.called;
         });
 
         it('should update an existing summary if found', async () => {
-            findByWeekStub.mockResolvedValue({ id: 'summary1' });
-            updateStub.mockImplementation(async (id, updates) => ({ id, ...updates }));
+            findByWeekStub.resolves({ id: 'summary1' });
+            updateStub.callsFake(async (id, updates) => ({ id, ...updates }));
             const result = await WeeklyReadingSummaryService.generateSummaryFromSessions(userId, weekStart, weekEnd);
-            expect(result).toMatchObject({
-            id: 'summary1',
-            totalReadingMinutes: 90,
-            totalPagesRead: 30,
-            averageSpeed: expect.any(Number)
+            expect(result).to.include({
+                id: 'summary1',
+                totalReadingMinutes: 90,
+                totalPagesRead: 30
             });
-            expect(updateStub).toHaveBeenCalledWith('summary1', expect.objectContaining({ totalReadingMinutes: 90 }));
-            expect(createStub).not.toHaveBeenCalled();
+            expect(result.averageSpeed).to.be.a('number');
+            expect(updateStub).to.have.been.calledWith('summary1', sinon.match({ totalReadingMinutes: 90 }));
+            expect(createStub).to.not.have.been.called;
         });
     });
 });

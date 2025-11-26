@@ -1,7 +1,6 @@
 import models from '../entities/index.js';
 import WeeklyReadingSummaryRepository from '../repositories/weeklyReadingSummary.repository.js';
 import ReadingSessionRepository from '../repositories/readingSession.repository.js';
-import models from '../entities/index.js';
 
 class WeeklyReadingSummaryService {
 
