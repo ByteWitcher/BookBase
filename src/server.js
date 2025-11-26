@@ -1,5 +1,7 @@
+
 import express from 'express';
 import models, { sequelize } from './entities/index.js';
+import readingSessionController from './controllers/readingSession.controller.js';
 
 export class Server {
 
@@ -9,6 +11,9 @@ export class Server {
         app.get('/', (req, res) => {
             res.send('Hello World!');
         });
+
+        // Leaderboard endpoint
+        app.get('/leaderboard', readingSessionController.getLeaderboard);
 
         try {
             // non-destructive schema changes

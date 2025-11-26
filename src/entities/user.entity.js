@@ -10,7 +10,11 @@ export default function initUser(sequelize) {
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4,
       },
-      // minimal stub, will be replaced with full model later
+      username: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
     },
     {
       sequelize,

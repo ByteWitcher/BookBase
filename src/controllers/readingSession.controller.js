@@ -10,6 +10,20 @@ function triggerAchievementCheck(userId, sessionData) {
 }
 
 export default {
+
+	/**
+	 * Get leaderboard of users by total pages read
+	 * Query param: limit (optional)
+	 */
+	async getLeaderboard(req, res) {
+		try {
+			const limit = parseInt(req.query.limit, 10) || 10;
+			const leaderboard = await ReadingSessionService.getLeaderboard(limit);
+			res.json(leaderboard);
+		} catch (err) {
+			res.status(400).json({ error: err.message });
+		}
+	},
     
 	/**
 	 * Create a new reading session

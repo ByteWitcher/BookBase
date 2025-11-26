@@ -1,7 +1,7 @@
 import models from '../entities/index.js';
 import ReadingSessionRepository from '../repositories/readingSession.repository.js';
 
-const { Book } = models;
+const { Book, User } = models;
 
 export function validateSessionInput({ book, startPage, endPage, startTime, endTime }) {
   if (!book) throw new Error('Book not found');
@@ -100,6 +100,44 @@ class ReadingSessionService {
       }
     }
     return result;
+  }
+
+  /**
+   * Returns the leaderboard of users by total pages read.
+   * @param {number} [limit=10] - Number of top users to return
+   * @returns {Promise<Array<{ userId: string, totalPages: number }>>}
+   */
+  async getLeaderboard(limit = 10) {
+    const { ReadingSession } = (await import('../entities/index.js')).default;
+    // Use raw query for aggregation
+    const results = await ReadingSession.sequelize.query(
+      `SELECT "userId", SUM("endPage" - "startPage") AS "totalPages"
+       FROM "ReadingSessions"
+       GROUP BY "userId"
+       ORDER BY "totalPages" DESC
+       LIMIT :limit`,
+      {
+        replacements: { limit },
+        type: ReadingSession.sequelize.QueryTypes.SELECT,
+      }
+      
+    );
+    // Fetch usernames for each userId
+    const userIds = results.map(r => r.userId);
+    const users = await User.findAll({
+      where: { id: userIds },
+      attributes: ['id', 'username'],
+      raw: true
+    });
+    const userMap = Object.fromEntries(users.map(u => [u.id, u.username]));
+
+    // Add position and username to each result
+    return results.map((r, idx) => ({
+      position: idx + 1,
+      userId: r.userId,
+      username: userMap[r.userId] || null,
+      totalPages: Number(r.totalPages)
+  }));
   }
 }
 
