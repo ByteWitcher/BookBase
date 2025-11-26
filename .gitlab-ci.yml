@@ -10,7 +10,7 @@ format-check:
   script:
     - npm ci
     - echo "Running Prettier format checks..."
-    - npx prettier . --write "src/**/*" "test/**/*"
+    - npx prettier "src/**/*" "test/**/*" --check
   only:
     - merge_requests
 
@@ -21,10 +21,6 @@ unit-tests:
     - npm ci
     - echo "Running unit tests..."
     - npm test
-  artifacts:
-    when: always
-    paths:
-      - coverage/
   only:
     - merge_requests
 
@@ -61,4 +57,3 @@ sonarqube-check:
     - merge_requests
   dependencies:
     - coverage-report
-
