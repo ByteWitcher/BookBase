@@ -13,7 +13,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "mocha --recursive",
-    "coverage": "nyc --reporter=lcov --reporter=text mocha"
+    "coverage": "nyc --reporter=lcov --reporter=text mocha --recursive"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
