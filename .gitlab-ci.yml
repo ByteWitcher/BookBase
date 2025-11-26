@@ -61,4 +61,3 @@ sonarqube-check:
     - merge_requests
   dependencies:
     - coverage-report
-
