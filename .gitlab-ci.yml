@@ -21,10 +21,6 @@ unit-tests:
     - npm ci
     - echo "Running unit tests..."
     - npm test
-  artifacts:
-    when: always
-    paths:
-      - coverage/
   only:
     - merge_requests
 
