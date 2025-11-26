@@ -1,4 +1,4 @@
-import bookGenreService from "../services/book-genre.service";
+import bookGenreService from "../services/book-genre.service.js";
 
 class BookGenreController {
   async createBookGenre(req, res) {

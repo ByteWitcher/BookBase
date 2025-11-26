@@ -73,7 +73,7 @@ const Book = sequelize.define(
 Book.associate = (models) => {
   Book.belongsTo(models.BookType, { foreignKey: "bookTypeId", as: "bookType" });
   Book.belongsToMany(models.BookGenre, {
-    through: "BookGenres",
+    through: "BooksGenres",
     foreignKey: "bookId",
     as: "bookGenres",
   });

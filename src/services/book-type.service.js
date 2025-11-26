@@ -1,6 +1,6 @@
-import bookTypeRepository from "../repositories/book-type.repository";
-import bookService from "./book.service";
-import HttpError from "../utils/http-error.util";
+import bookTypeRepository from "../repositories/book-type.repository.js";
+import bookService from "./book.service.js";
+import HttpError from "../utils/http-error.util.js";
 
 class BookTypeService {
   async createBookType(data) {

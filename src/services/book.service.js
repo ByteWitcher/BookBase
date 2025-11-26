@@ -1,12 +1,12 @@
-import bookRepository from "../repositories/book.repository";
-import bookTypeService from "./book-type.service";
-import bookGenreService from "./book-genre.service";
-import bookRequestService from "./book-request.service";
+import bookRepository from "../repositories/book.repository.js";
+import bookTypeService from "./book-type.service.js";
+import bookGenreService from "./book-genre.service.js";
+import bookRequestService from "./book-request.service.js";
 import crypto from "crypto";
 import { Op } from "sequelize";
 import db from "../entities/index.js";
-import HttpError from "../utils/http-error.util";
-import uploadFileToS3 from "../utils/s3.util";
+import HttpError from "../utils/http-error.util.js";
+import uploadFileToS3 from "../utils/s3.util.js";
 
 const { BookType, BookGenre } = db;
 
