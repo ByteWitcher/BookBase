@@ -2,10 +2,10 @@ import * as chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinonChai from 'sinon-chai';
 import sinon from 'sinon';
-import WeeklyReadingSummaryRepository from '../src/repositories/weeklyReadingSummary.repository.js';
-import ReadingSessionRepository from '../src/repositories/readingSession.repository.js';
-import ReadingAchievementService from '../src/services/readingAchievement.service.js';
-import ReadingAchievementRepository from '../src/repositories/readingAchievement.repository.js';
+import WeeklyReadingSummaryRepository from '../../src/repositories/weeklyReadingSummary.repository.js';
+import ReadingSessionRepository from '../../src/repositories/readingSession.repository.js';
+import ReadingAchievementService from '../../src/services/readingAchievement.service.js';
+import ReadingAchievementRepository from '../../src/repositories/readingAchievement.repository.js';
 
 // Configure Chai plugins
 chai.use(chaiAsPromised);
@@ -170,7 +170,7 @@ describe('ReadingAchievementService', () => {
     // Dynamically import Book model for mocking
     let Book;
     before(async () => {
-      Book = (await import('../src/entities/index.js')).default.Book;
+      Book = (await import('../../src/entities/index.js')).default.Book;
     });
     beforeEach(() => {
       repoFindAllStub = sinon.stub(ReadingSessionRepository, 'findAllByUser');

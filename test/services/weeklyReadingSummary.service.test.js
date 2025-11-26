@@ -2,9 +2,9 @@ import * as chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinonChai from 'sinon-chai';
 import sinon from 'sinon';
-import WeeklyReadingSummaryService from '../src/services/weeklyReadingSummary.service.js';
-import WeeklyReadingSummaryRepository from '../src/repositories/weeklyReadingSummary.repository.js';
-import ReadingSessionRepository from '../src/repositories/readingSession.repository.js';
+import WeeklyReadingSummaryService from '../../src/services/weeklyReadingSummary.service.js';
+import WeeklyReadingSummaryRepository from '../../src/repositories/weeklyReadingSummary.repository.js';
+import ReadingSessionRepository from '../../src/repositories/readingSession.repository.js';
 
 // Configure Chai plugins
 chai.use(chaiAsPromised);

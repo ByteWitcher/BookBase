@@ -2,9 +2,9 @@ import * as chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinonChai from 'sinon-chai';
 import sinon from 'sinon';
-import * as readingSessionServiceModule from '../src/services/readingSession.service.js';
-import ReadingSessionRepository from '../src/repositories/readingSession.repository.js';
-import models from '../src/entities/index.js';
+import * as readingSessionServiceModule from '../../src/services/readingSession.service.js';
+import ReadingSessionRepository from '../../src/repositories/readingSession.repository.js';
+import models from '../../src/entities/index.js';
 
 // Configure Chai plugins
 chai.use(chaiAsPromised);
