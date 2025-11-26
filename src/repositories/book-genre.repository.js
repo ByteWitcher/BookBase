@@ -20,7 +20,7 @@ class BookGenreRepository {
   }
 
   findByIds(ids) {
-    return BookGenre.findAll({ where: { ids } });
+    return BookGenre.findAll({ where: { id: ids } });
   }
 
   findAll() {

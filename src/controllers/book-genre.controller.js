@@ -6,7 +6,7 @@ class BookGenreController {
       const bookGenre = await bookGenreService.createBookGenre(req.body);
       res.status(201).json(bookGenre);
     } catch (error) {
-      res.status(error.statusCode).json({ message: error.message });
+      res.status(error.statusCode || 500).json({ message: error.message });
     }
   }
 
@@ -15,7 +15,7 @@ class BookGenreController {
       const bookGenre = await bookGenreService.getBookGenreById(req.params.id);
       res.status(200).json(bookGenre);
     } catch (error) {
-      res.status(error.statusCode).json({ message: error.message });
+      res.status(error.statusCode || 500).json({ message: error.message });
     }
   }
 
@@ -26,7 +26,7 @@ class BookGenreController {
       );
       res.status(200).json(bookGenre);
     } catch (error) {
-      res.status(error.statusCode).json({ message: error.message });
+      res.status(error.statusCode || 500).json({ message: error.message });
     }
   }
 
@@ -37,7 +37,7 @@ class BookGenreController {
       );
       res.status(200).json(bookGenre);
     } catch (error) {
-      res.status(error.statusCode).json({ message: error.message });
+      res.status(error.statusCode || 500).json({ message: error.message });
     }
   }
 
@@ -46,7 +46,7 @@ class BookGenreController {
       const bookGenres = await bookGenreService.getBookGenres();
       res.status(200).json(bookGenres);
     } catch (error) {
-      res.status(error.statusCode).json({ message: error.message });
+      res.status(error.statusCode || 500).json({ message: error.message });
     }
   }
 
@@ -58,7 +58,7 @@ class BookGenreController {
       );
       res.status(200).json(bookGenre);
     } catch (error) {
-      res.status(error.statusCode).json({ message: error.message });
+      res.status(error.statusCode || 500).json({ message: error.message });
     }
   }
 
@@ -67,7 +67,7 @@ class BookGenreController {
       await bookGenreService.deleteBookGenreById(req.params.id);
       res.status(200).json({ message: "Book genre deleted successfully" });
     } catch (error) {
-      res.status(error.statusCode).json({ message: error.message });
+      res.status(error.statusCode || 500).json({ message: error.message });
     }
   }
 }

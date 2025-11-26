@@ -1,4 +1,3 @@
-// utils/s3.js
 import AWS from "aws-sdk";
 import dotenv from "dotenv";
 
@@ -23,4 +22,18 @@ async function uploadFileToS3(fileBuffer, fileName, mimeType) {
   return uploadResult.Location;
 }
 
-export default uploadFileToS3;
+async function deleteFileFromS3(key) {
+  if (!key) return;
+
+  const bucket = process.env.S3_BUCKET_NAME;
+
+  const params = {
+    Bucket: bucket,
+    Key: key,
+  };
+
+  await s3.deleteObject(params).promise();
+  return true;
+}
+
+export { uploadFileToS3, deleteFileFromS3 };

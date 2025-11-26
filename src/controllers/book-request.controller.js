@@ -13,7 +13,7 @@ class BookRequestController {
       );
       res.status(201).json(bookRequest);
     } catch (error) {
-      res.status(error.statusCode).json({ message: error.message });
+      res.status(error.statusCode || 500).json({ message: error.message });
     }
   }
 
@@ -25,7 +25,7 @@ class BookRequestController {
       );
       res.status(200).json(bookRequest);
     } catch (error) {
-      res.status(error.statusCode).json({ message: error.message });
+      res.status(error.statusCode || 500).json({ message: error.message });
     }
   }
 
@@ -37,7 +37,7 @@ class BookRequestController {
       );
       res.status(200).json(result);
     } catch (error) {
-      res.status(error.statusCode).json({ message: error.message });
+      res.status(error.statusCode || 500).json({ message: error.message });
     }
   }
 
@@ -50,7 +50,7 @@ class BookRequestController {
       );
       res.status(200).json(bookRequest);
     } catch (error) {
-      res.status(error.statusCode).json({ message: error.message });
+      res.status(error.statusCode || 500).json({ message: error.message });
     }
   }
 
@@ -59,7 +59,7 @@ class BookRequestController {
       await BookRequestService.deleteBookRequestById(req.params.id);
       res.status(200).json({ message: "Book request deleted successfully" });
     } catch (error) {
-      res.status(error.statusCode).json({ message: error.message });
+      res.status(error.statusCode || 500).json({ message: error.message });
     }
   }
 }

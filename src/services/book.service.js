@@ -6,7 +6,7 @@ import crypto from "crypto";
 import { Op } from "sequelize";
 import db from "../entities/index.js";
 import HttpError from "../utils/http-error.util.js";
-import uploadFileToS3 from "../utils/s3.util.js";
+import { uploadFileToS3, deleteFileFromS3 } from "../utils/s3.util.js";
 
 const { BookType, BookGenre } = db;
 
@@ -15,7 +15,7 @@ class BookService {
     const { bookGenreIds, pdfFile, ...bookData } = data;
 
     if (!pdfFile) {
-      throw new HttpError("PDF file is required", 400);
+      throw new HttpError(400, "PDF file is required");
     }
 
     const fingerprint = this._buildBookFingerprint(bookData);
@@ -25,11 +25,11 @@ class BookService {
     );
     if (existingFingerprint) {
       if (existingFingerprint.isActive)
-        throw new HttpError("Book already exists", 400);
+        throw new HttpError(400, "Book already exists");
       else
         throw new HttpError(
-          "Book already submitted and is pending approval",
-          400
+          400,
+          "Book already submitted and is pending approval"
         );
     }
 
@@ -42,15 +42,15 @@ class BookService {
     );
 
     if (existingBookGenres.length !== bookGenreIds.length)
-      throw new HttpError("One or more book genres are not found", 404);
+      throw new HttpError(404, "One or more book genres are not found");
 
     const s3PdfUrl = await uploadFileToS3(
       pdfFile.buffer,
-      pdfFile.originalname,
+      fingerprint + ".pdf",
       pdfFile.mimetype
     );
 
-    const book = await bookRepository.create({
+    let book = await bookRepository.create({
       ...bookData,
       fingerprint,
       s3PdfUrl,
@@ -60,6 +60,7 @@ class BookService {
     });
 
     await book.setBookGenres(bookGenreIds);
+    book = book.toJSON();
     book.bookType = existingBookType;
     book.bookGenres = existingBookGenres;
     return book;
@@ -67,9 +68,7 @@ class BookService {
 
   async getBookById(id) {
     const book = await bookRepository.findById(id);
-    if (!book) throw new HttpError("Book not found", 404);
-    book.bookType = await book.getBookType();
-    book.bookGenres = await book.getBookGenres();
+    if (!book) throw new HttpError(404, "Book not found");
     return book;
   }
 
@@ -232,7 +231,7 @@ class BookService {
 
   async updateBook(id, data) {
     const book = await bookRepository.findById(id);
-    if (!book) throw new HttpError("Book not found", 404);
+    if (!book) throw new HttpError(404, "Book not found");
     const { bookGenreIds, ...bookData } = data;
     const allowed = [
       "title",
@@ -263,7 +262,7 @@ class BookService {
       );
 
       if (existingBookGenres.length !== bookGenreIds.length)
-        throw new HttpError("One or more book genres are not found", 404);
+        throw new HttpError(404, "One or more book genres are not found");
     }
 
     Object.assign(book, updates);
@@ -271,7 +270,7 @@ class BookService {
     const existingFingerprint = await bookRepository.findByFingerprint(
       fingerprint
     );
-    if (existingFingerprint) throw new HttpError("Book already exists", 400);
+    if (existingFingerprint) throw new HttpError(400, "Book already exists");
 
     await book.save();
     if (bookGenreIds !== undefined) {
@@ -291,9 +290,12 @@ class BookService {
 
   async deleteBookById(id) {
     const book = await bookRepository.findById(id);
-    if (!book) throw new HttpError("Book not found", 404);
+    if (!book) throw new HttpError(404, "Book not found");
+    if (book.s3PdfUrl) {
+      await deleteFileFromS3(book.fingerprint + ".pdf");
+    }
     await book.setBookGenres([]);
-    const bookRequest = book.getBookRequest();
+    const bookRequest = await book.getBookRequest();
     if (bookRequest)
       await bookRequestService.updateBookRequestWithBookAttributes(
         bookRequest,

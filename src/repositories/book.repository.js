@@ -1,6 +1,6 @@
 import db from "../entities/index.js";
 
-const { Book, BookGenre } = db;
+const { Book, BookType, BookGenre } = db;
 
 class BookRepository {
   create(data) {
@@ -8,7 +8,12 @@ class BookRepository {
   }
 
   findById(id) {
-    return Book.findByPk(id);
+    return Book.findByPk(id, {
+      include: [
+        { model: BookType, as: "bookType" },
+        { model: BookGenre, as: "bookGenres" },
+      ],
+    });
   }
 
   findByFingerprint(fingerprint) {

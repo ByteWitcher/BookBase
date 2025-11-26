@@ -10,20 +10,20 @@ class BookRequestService {
     data.isActive = false;
     data.adminId = null;
     const book = await bookService.createBook(userId, data);
-    const bookRequest = await bookRequestRepository.create({
+    let bookRequest = await bookRequestRepository.create({
       bookId: book.id,
       userId,
     });
+    bookRequest = bookRequest.toJSON();
     bookRequest.book = book;
     return bookRequest;
   }
 
   async getBookRequestById(user, id) {
     const bookRequest = await bookRequestRepository.findById(id);
-    if (!bookRequest) throw new HttpError("Book request not found", 404);
+    if (!bookRequest) throw new HttpError(404, "Book request not found");
     if (user.role !== "ADMIN" && bookRequest.userId !== user.id)
-      throw new HttpError("You are not allowed to view this book request", 403);
-    bookRequest.book = await bookRequest.getBook();
+      throw new HttpError(403, "You are not allowed to view this book request");
     return bookRequest;
   }
 
@@ -96,7 +96,7 @@ class BookRequestService {
 
   async updateBookRequest(userId, id, data) {
     const bookRequest = await bookRequestRepository.findById(id);
-    if (!bookRequest) throw new HttpError("Book request not found", 404);
+    if (!bookRequest) throw new HttpError(404, "Book request not found");
 
     const allowed = ["comment"];
     const updates = {};
@@ -118,7 +118,6 @@ class BookRequestService {
       }
     }
     await bookRequest.update(updates);
-    bookRequest.book = await bookRequest.getBook();
     return bookRequest;
   }
 
@@ -128,10 +127,10 @@ class BookRequestService {
   }
 
   async deleteBookRequestById(id) {
-    const bookRequest = bookRequestRepository.findById(id);
-    if (!bookRequest) throw new HttpError("Book request not found", 404);
-    const book = bookService.findBookById(bookRequest.bookId);
-    if (book) throw new HttpError("Book still exists", 400);
+    const bookRequest = await bookRequestRepository.findById(id);
+    if (!bookRequest) throw new HttpError(404, "Book request not found");
+    if (bookRequest.bookId !== null)
+      throw new HttpError(400, "Book still exists");
     return await bookRequestRepository.deleteById(id);
   }
 }

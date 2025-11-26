@@ -6,7 +6,7 @@ class BookTypeController {
       const bookType = await BookTypeService.createBookType(req.body);
       res.status(201).json(bookType);
     } catch (error) {
-      res.status(error.statusCode).json({ message: error.message });
+      res.status(error.statusCode || 500).json({ message: error.message });
     }
   }
 
@@ -15,7 +15,7 @@ class BookTypeController {
       const bookType = await BookTypeService.getBookTypeById(req.params.id);
       res.status(200).json(bookType);
     } catch (error) {
-      res.status(error.statusCode).json({ message: error.message });
+      res.status(error.statusCode || 500).json({ message: error.message });
     }
   }
 
@@ -24,7 +24,7 @@ class BookTypeController {
       const bookType = await BookTypeService.getBookTypeByCode(req.params.code);
       res.status(200).json(bookType);
     } catch (error) {
-      res.status(error.statusCode).json({ message: error.message });
+      res.status(error.statusCode || 500).json({ message: error.message });
     }
   }
 
@@ -33,7 +33,7 @@ class BookTypeController {
       const bookType = await BookTypeService.getBookTypeByName(req.params.name);
       res.status(200).json(bookType);
     } catch (error) {
-      res.status(error.statusCode).json({ message: error.message });
+      res.status(error.statusCode || 500).json({ message: error.message });
     }
   }
 
@@ -42,7 +42,7 @@ class BookTypeController {
       const bookTypes = await BookTypeService.getBookTypes();
       res.status(200).json(bookTypes);
     } catch (error) {
-      res.status(error.statusCode).json({ message: error.message });
+      res.status(error.statusCode || 500).json({ message: error.message });
     }
   }
 
@@ -54,7 +54,7 @@ class BookTypeController {
       );
       res.status(200).json(bookType);
     } catch (error) {
-      res.status(error.statusCode).json({ message: error.message });
+      res.status(error.statusCode || 500).json({ message: error.message });
     }
   }
 
@@ -63,7 +63,7 @@ class BookTypeController {
       await BookTypeService.deleteBookTypeById(req.params.id);
       res.status(200).json({ message: "Book type deleted successfully" });
     } catch (error) {
-      res.status(error.statusCode).json({ message: error.message });
+      res.status(error.statusCode || 500).json({ message: error.message });
     }
   }
 }

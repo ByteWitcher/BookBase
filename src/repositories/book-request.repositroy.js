@@ -1,6 +1,6 @@
 import db from "../entities/index.js";
 
-const { BookRequest } = db;
+const { BookRequest, Book } = db;
 
 class BookRequestRepository {
   create(data) {
@@ -8,7 +8,9 @@ class BookRequestRepository {
   }
 
   findById(id) {
-    return BookRequest.findByPk(id);
+    return BookRequest.findByPk(id, {
+      include: [{ model: Book, as: "book" }],
+    });
   }
 
   async findFiltered({ where, include, limit, offset, order }) {
