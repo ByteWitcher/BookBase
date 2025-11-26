@@ -1,7 +1,8 @@
 stages:
   - formatting
-  - sonarqube
   - unit tests
+  - coverage
+  - sonarqube
 
 format-check:
   stage: formatting
@@ -10,6 +11,34 @@ format-check:
     - npm ci
     - echo "Running Prettier format checks..."
     - npx prettier . --write
+  only:
+    - merge_requests
+
+unit-tests:
+  stage: unit tests
+  image: node:18
+  script:
+    - npm ci
+    - echo "Running unit tests..."
+    - npm test
+  artifacts:
+    when: always
+    paths:
+      - coverage/
+  only:
+    - merge_requests
+
+coverage-report:
+  stage: coverage
+  image: node:18
+  script:
+    - npm ci
+    - echo "Generating coverage report..."
+    - npm run coverage
+  artifacts:
+    when: always
+    paths:
+      - coverage/
   only:
     - merge_requests
 
@@ -30,17 +59,6 @@ sonarqube-check:
   allow_failure: true
   only:
     - merge_requests
+  dependencies:
+    - coverage-report
 
-unit-tests:
-  stage: unit tests
-  image: node:18
-  script:
-    - npm ci
-    - echo "Running unit tests..."
-    - npm test
-  artifacts:
-    when: always
-    paths:
-      - coverage/
-  only:
-    - merge_requests
