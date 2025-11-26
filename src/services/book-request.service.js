@@ -46,7 +46,7 @@ class BookRequestService {
     const where = {};
 
     if (user.role === "USER") {
-      where.userId = user.userId;
+      where.userId = user.id;
     } else {
       if (userId) where.userId = userId;
       if (adminId) where.adminId = adminId;

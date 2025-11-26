@@ -6,7 +6,7 @@ import crypto from "crypto";
 import { Op } from "sequelize";
 import db from "../entities/index.js";
 import HttpError from "../utils/http-error.util.js";
-import { uploadFileToS3, deleteFileFromS3 } from "../utils/s3.util.js";
+import s3Utils from "../utils/s3-wrapper.util.js";
 
 const { BookType, BookGenre } = db;
 
@@ -44,7 +44,7 @@ class BookService {
     if (existingBookGenres.length !== bookGenreIds.length)
       throw new HttpError(404, "One or more book genres are not found");
 
-    const s3PdfUrl = await uploadFileToS3(
+    const s3PdfUrl = await s3Utils.uploadFileToS3(
       pdfFile.buffer,
       fingerprint + ".pdf",
       pdfFile.mimetype
@@ -270,7 +270,11 @@ class BookService {
     const existingFingerprint = await bookRepository.findByFingerprint(
       fingerprint
     );
-    if (existingFingerprint) throw new HttpError(400, "Book already exists");
+    if (existingFingerprint && existingFingerprint.id !== book.id) {
+      throw new HttpError(400, "Book already exists");
+    }
+
+    book.fingerprint = fingerprint;
 
     await book.save();
     if (bookGenreIds !== undefined) {
@@ -292,7 +296,7 @@ class BookService {
     const book = await bookRepository.findById(id);
     if (!book) throw new HttpError(404, "Book not found");
     if (book.s3PdfUrl) {
-      await deleteFileFromS3(book.fingerprint + ".pdf");
+      await s3Utils.deleteFileFromS3(book.fingerprint + ".pdf");
     }
     await book.setBookGenres([]);
     const bookRequest = await book.getBookRequest();
