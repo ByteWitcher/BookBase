@@ -12,7 +12,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "mocha"
+    "test": "mocha",
+    "coverage": "nyc --reporter=lcov --reporter=text mocha"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -24,6 +25,13 @@
     "sequelize": "^6.37.7"
   },
   "devDependencies": {
-    "mocha": "^11.7.4"
+    "mocha": "^11.7.4",
+    "nyc": "^17.1.0"
+  },
+  "nyc": {
+    "statements": 80,
+    "branches": 80,
+    "functions": 80,
+    "lines": 80
   }
 }
