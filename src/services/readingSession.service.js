@@ -5,7 +5,7 @@ const { Book, User } = models;
 
 export function validateSessionInput({ book, startPage, endPage, startTime, endTime }) {
   if (!book) throw new Error('Book not found');
-  if (startPage < 1 || endPage > book.pageNumbers || startPage > endPage) {
+  if (startPage < 1 || endPage > book.pageCount || startPage > endPage) {
     throw new Error('Invalid page range for this book');
   }
   if (!startTime || !endTime) throw new Error('Start and end time are required');

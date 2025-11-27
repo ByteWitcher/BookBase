@@ -22,43 +22,43 @@ describe('validateSessionInput', () => {
   });
 
   it('should throw if startPage < 1', () => {
-    expect(() => validateSessionInput({ book: { pageNumbers: 100 }, startPage: 0, endPage: 10, startTime: '2025-11-22T10:00:00Z', endTime: '2025-11-22T11:00:00Z' }))
+    expect(() => validateSessionInput({ book: { pageCount: 100 }, startPage: 0, endPage: 10, startTime: '2025-11-22T10:00:00Z', endTime: '2025-11-22T11:00:00Z' }))
       .to.throw('Invalid page range for this book');
   });
 
-  it('should throw if endPage > book.pageNumbers', () => {
-    expect(() => validateSessionInput({ book: { pageNumbers: 100 }, startPage: 1, endPage: 101, startTime: '2025-11-22T10:00:00Z', endTime: '2025-11-22T11:00:00Z' }))
+  it('should throw if endPage > book.pageCount', () => {
+    expect(() => validateSessionInput({ book: { pageCount: 100 }, startPage: 1, endPage: 101, startTime: '2025-11-22T10:00:00Z', endTime: '2025-11-22T11:00:00Z' }))
       .to.throw('Invalid page range for this book');
   });
 
   it('should throw if startPage > endPage', () => {
-    expect(() => validateSessionInput({ book: { pageNumbers: 100 }, startPage: 20, endPage: 10, startTime: '2025-11-22T10:00:00Z', endTime: '2025-11-22T11:00:00Z' }))
+    expect(() => validateSessionInput({ book: { pageCount: 100 }, startPage: 20, endPage: 10, startTime: '2025-11-22T10:00:00Z', endTime: '2025-11-22T11:00:00Z' }))
       .to.throw('Invalid page range for this book');
   });
 
   it('should throw if startTime or endTime is missing', () => {
-    expect(() => validateSessionInput({ book: { pageNumbers: 100 }, startPage: 1, endPage: 10, startTime: null, endTime: '2025-11-22T11:00:00Z' }))
+    expect(() => validateSessionInput({ book: { pageCount: 100 }, startPage: 1, endPage: 10, startTime: null, endTime: '2025-11-22T11:00:00Z' }))
       .to.throw('Start and end time are required');
-    expect(() => validateSessionInput({ book: { pageNumbers: 100 }, startPage: 1, endPage: 10, startTime: '2025-11-22T10:00:00Z', endTime: null }))
+    expect(() => validateSessionInput({ book: { pageCount: 100 }, startPage: 1, endPage: 10, startTime: '2025-11-22T10:00:00Z', endTime: null }))
       .to.throw('Start and end time are required');
   });
 
   it('should throw if startTime or endTime is invalid date', () => {
-    expect(() => validateSessionInput({ book: { pageNumbers: 100 }, startPage: 1, endPage: 10, startTime: 'invalid', endTime: '2025-11-22T11:00:00Z' }))
+    expect(() => validateSessionInput({ book: { pageCount: 100 }, startPage: 1, endPage: 10, startTime: 'invalid', endTime: '2025-11-22T11:00:00Z' }))
       .to.throw('Invalid date format');
-    expect(() => validateSessionInput({ book: { pageNumbers: 100 }, startPage: 1, endPage: 10, startTime: '2025-11-22T10:00:00Z', endTime: 'invalid' }))
+    expect(() => validateSessionInput({ book: { pageCount: 100 }, startPage: 1, endPage: 10, startTime: '2025-11-22T10:00:00Z', endTime: 'invalid' }))
       .to.throw('Invalid date format');
   });
 
   it('should throw if endTime <= startTime', () => {
-    expect(() => validateSessionInput({ book: { pageNumbers: 100 }, startPage: 1, endPage: 10, startTime: '2025-11-22T11:00:00Z', endTime: '2025-11-22T10:00:00Z' }))
+    expect(() => validateSessionInput({ book: { pageCount: 100 }, startPage: 1, endPage: 10, startTime: '2025-11-22T11:00:00Z', endTime: '2025-11-22T10:00:00Z' }))
       .to.throw('End time must be after start time');
-    expect(() => validateSessionInput({ book: { pageNumbers: 100 }, startPage: 1, endPage: 10, startTime: '2025-11-22T10:00:00Z', endTime: '2025-11-22T10:00:00Z' }))
+    expect(() => validateSessionInput({ book: { pageCount: 100 }, startPage: 1, endPage: 10, startTime: '2025-11-22T10:00:00Z', endTime: '2025-11-22T10:00:00Z' }))
       .to.throw('End time must be after start time');
   });
 
   it('should not throw for valid input', () => {
-    expect(() => validateSessionInput({ book: { pageNumbers: 100 }, startPage: 1, endPage: 10, startTime: '2025-11-22T10:00:00Z', endTime: '2025-11-22T11:00:00Z' }))
+    expect(() => validateSessionInput({ book: { pageCount: 100 }, startPage: 1, endPage: 10, startTime: '2025-11-22T10:00:00Z', endTime: '2025-11-22T11:00:00Z' }))
       .to.not.throw();
   });
 });
@@ -82,7 +82,7 @@ describe('createSession', () => {
     });
 
     it('should create a session if input is valid', async () => {
-      bookStub.resolves({ id: 'book1', pageNumbers: 200 });
+      bookStub.resolves({ id: 'book1', pageCount: 200 });
       // Mock the repository create method
       const repoCreate = sinon.stub(ReadingSessionRepository, 'create').resolves(fakeSession);
       const result = await readingSessionServiceModule.default.createSession({
@@ -113,7 +113,7 @@ describe('updateSession', () => {
   };
   beforeEach(() => {
     repoFindStub = sinon.stub(ReadingSessionRepository, 'findById').resolves(fakeSession);
-    bookStub = sinon.stub(models.Book, 'findByPk').resolves({ id: 'book1', pageNumbers: 200 });
+    bookStub = sinon.stub(models.Book, 'findByPk').resolves({ id: 'book1', pageCount: 200 });
     repoUpdateStub = sinon.stub(ReadingSessionRepository, 'update').resolves({ ...fakeSession, startPage: 2 });
   });
   afterEach(() => {

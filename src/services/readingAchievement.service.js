@@ -104,7 +104,7 @@ class ReadingAchievementService {
     const { Book } = (await import('../entities/index.js')).default;
     for (const s of sessions) {
       const book = await Book.findByPk(s.bookId);
-      if (book && s.endPage === book.pageNumbers) {
+      if (book && s.endPage === book.pageCount) {
         finishedBooks.add(s.bookId);
       }
     }

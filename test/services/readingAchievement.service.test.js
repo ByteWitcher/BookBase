@@ -186,7 +186,7 @@ describe('ReadingAchievementService', () => {
       }));
       repoFindAllStub.resolves(sessions);
       // All books have 100 pages
-      bookFindStub.callsFake(async (id) => ({ id, pageNumbers: 100 }));
+      bookFindStub.callsFake(async (id) => ({ id, pageCount: 100 }));
       expect(await service.checkTenBooksFinished('u1')).to.equal(true);
     });
     it('should return false if user finished less than 10 books', async () => {
@@ -195,7 +195,7 @@ describe('ReadingAchievementService', () => {
         endPage: 100
       }));
       repoFindAllStub.resolves(sessions);
-      bookFindStub.callsFake(async (id) => ({ id, pageNumbers: 100 }));
+      bookFindStub.callsFake(async (id) => ({ id, pageCount: 100 }));
       expect(await service.checkTenBooksFinished('u1')).to.equal(false);
     });
     it('should not count unfinished books', async () => {
@@ -213,12 +213,12 @@ describe('ReadingAchievementService', () => {
       ];
       repoFindAllStub.resolves(sessions);
       // Only b2 is unfinished
-      bookFindStub.callsFake(async (id) => ({ id, pageNumbers: 100 }));
+      bookFindStub.callsFake(async (id) => ({ id, pageCount: 100 }));
       expect(await service.checkTenBooksFinished('u1')).to.equal(false);
       // Now, make all finished
       const sessions2 = sessions.map((s, i) => ({ ...s, endPage: 100 }));
       repoFindAllStub.resolves(sessions2);
-      bookFindStub.callsFake(async (id) => ({ id, pageNumbers: 100 }));
+      bookFindStub.callsFake(async (id) => ({ id, pageCount: 100 }));
       expect(await service.checkTenBooksFinished('u1')).to.equal(true);
     });
   });
