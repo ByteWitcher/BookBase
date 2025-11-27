@@ -71,14 +71,18 @@ deploy-npm:
       echo "AWS_REGION=$AWS_REGION" >> .env
       echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> .env
       echo "NPM_TOKEN=$NPM_TOKEN" >> .env
-
     - git config user.name "CI Bot"
-    - git config user.email "ci@ensiamg.org"
-
-    - 'npm version patch -m "ci: bump version to %s"'
+    - git config user.email "ci@ensiamg.com"
+    # Check if current version tag exists
+    - |
+      CURRENT_VERSION=$(node -p "require('./package.json').version")
+      if git rev-parse "v$CURRENT_VERSION" >/dev/null 2>&1; then
+        echo "Tag v$CURRENT_VERSION already exists, skipping npm version bump"
+      else
+        npm version patch -m "ci: bump version to %s"
+      fi
     - npm ci
     - npm publish
-
     - git push origin HEAD:$CI_COMMIT_REF_NAME --follow-tags
   only:
     - pushes
@@ -99,7 +103,6 @@ deploy-docker:
       echo "AWS_REGION=$AWS_REGION" >> .env
       echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> .env
       echo "NPM_TOKEN=$NPM_TOKEN" >> .env
-
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
     - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
