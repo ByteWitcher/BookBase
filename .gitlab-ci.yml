@@ -61,10 +61,7 @@ sonarqube-check:
 
 deploy-npm:
   stage: deploy
-  image: node:18
-  before_script:
-    - echo "@ngs:registry=https://im2ag-gitlab.univ-grenoble-alpes.fr/api/v4/projects/466/packages/npm/" > .npmrc
-    - echo "//im2ag-gitlab.univ-grenoble-alpes.fr/api/v4/projects/466/packages/npm/:_authToken=${NPM_TOKEN}" >> .npmrc
+  image: node:18exi
   script:
     - 'npm version patch -m "ci: bump version to %s"'
     - npm ci
