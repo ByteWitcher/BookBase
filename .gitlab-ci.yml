@@ -73,14 +73,6 @@ deploy-npm:
       echo "NPM_TOKEN=$NPM_TOKEN" >> .env
     - git config user.name "CI Bot"
     - git config user.email "ci@ensiamg.com"
-    # Only bump version if tag doesn't exist
-    - |
-      CURRENT_VERSION=$(node -p "require('./package.json').version")
-      if git rev-parse "v$CURRENT_VERSION" >/dev/null 2>&1; then
-        echo "Tag v$CURRENT_VERSION already exists, skipping npm version bump"
-      else
-        npm version patch -m "ci: bump version to %s"
-      fi
     - npm ci
     - npm publish
     - git push origin HEAD:$CI_COMMIT_REF_NAME --follow-tags
