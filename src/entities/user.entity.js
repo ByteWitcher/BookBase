@@ -1,59 +1,108 @@
-import { DataTypes } from 'sequelize';
-import sequelize from '../config/database.js';
+import { DataTypes } from "sequelize";
+import sequelize from "../config/database.js";
 
-const User = sequelize.define('User', {
-  id: { 
-    type: DataTypes.UUID, 
-    primaryKey: true,
-    defaultValue: DataTypes.UUIDV4
+const Book = sequelize.define(
+  "Book",
+  {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: DataTypes.UUIDV4,
+    },
+    // hash of title+authors+edition+languageCode
+    fingerprint: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    authors: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: false,
+    },
+    edition: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    languageCode: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: { is: /^[a-z]{2}$/ },
+    },
+    releaseDate: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    pageCount: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+    },
+    likes: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    rating: {
+      type: DataTypes.FLOAT.UNSIGNED,
+      allowNull: false,
+      defaultValue: 0.0,
+    },
+    s3PdfUrl: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        isUrl: true,
+      },
+    },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
-  username: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true
-  },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true
-  },
-  password: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  role: {
-    type: DataTypes.ENUM('USER', 'ADMIN'),
-    defaultValue: 'USER',
-    allowNull: false
-  }
-}, {
-  timestamps: true,
-});
+  { timestamps: true, updatedAt: false },
+);
 
-User.associate = (models) => {
-  // Favorites
-  User.belongsToMany(models.Book, {
+Book.associate = (models) => {
+  Book.belongsTo(models.BookType, { foreignKey: "bookTypeId", as: "bookType" });
+  Book.belongsToMany(models.BookGenre, {
+    through: "BooksGenres",
+    foreignKey: "bookId",
+    as: "bookGenres",
+  });
+  Book.belongsTo(models.User, { foreignKey: "userId", as: "user" });
+  Book.belongsTo(models.User, { foreignKey: "adminId", as: "admin" });
+  Book.hasOne(models.BookRequest, { foreignKey: "bookId", as: "bookRequest" });
+   // Favorites
+  Book.belongsToMany(models.User, {
     through: 'Favorites',
-    foreignKey: 'userId',
-    otherKey: 'bookId',
-    as: 'favoriteBooks',
+    foreignKey: 'bookId',
+    otherKey: 'userId',
+    as: 'favoritedByUsers',
     timestamps: true
   });
 
   // Likes
-  User.belongsToMany(models.Book, {
+  Book.belongsToMany(models.User, {
     through: 'Likes',
-    foreignKey: 'userId',
-    otherKey: 'bookId',
-    as: 'likedBooks',
+    foreignKey: 'bookId',
+    otherKey: 'userId',
+    as: 'likedByUsers',
     timestamps: true
   });
 
   // Reviews
-  User.hasMany(models.Review, {
-    foreignKey: 'userId',
+  Book.hasMany(models.Review, {
+    foreignKey: 'bookId',
     as: 'reviews'
   });
 };
 
-export default User;
+export default Book;
