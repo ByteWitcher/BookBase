@@ -63,7 +63,6 @@ deploy-npm:
   stage: deploy
   image: node:18
   script:
-    # Generate .env dynamically
     - |
       echo "JWT_SECRET=$JWT_SECRET" > .env
       echo "DATABASE_URL=$DATABASE_URL" >> .env
@@ -72,7 +71,6 @@ deploy-npm:
       echo "AWS_REGION=$AWS_REGION" >> .env
       echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> .env
       echo "NPM_TOKEN=$NPM_TOKEN" >> .env
-    # Configure Git for npm version
     - git config user.name "CI Bot"
     - git config user.email "ci@ensiamg.com"
     # Only bump version if tag doesn't exist
