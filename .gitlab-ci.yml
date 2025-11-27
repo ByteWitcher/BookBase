@@ -72,12 +72,13 @@ deploy-npm:
       echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> .env
       echo "NPM_TOKEN=$NPM_TOKEN" >> .env
 
+    - git config user.name "CI Bot"
+    - git config user.email "ci@ensiamg.org"
+
     - 'npm version patch -m "ci: bump version to %s"'
     - npm ci
     - npm publish
 
-    - git config user.name "CI Bot"
-    - git config user.email "ci@ensiamg.com"
     - git push --follow-tags
   only:
     - pushes
