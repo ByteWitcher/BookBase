@@ -65,12 +65,9 @@ deploy-npm:
   variables:
     NODE_ENV: production
   script:
-    - BASE_VERSION=$(node -p "require('./package.json').version")
-    - UNIQUE_VERSION="${BASE_VERSION}-${CI_PIPELINE_IID}"
-    - npm version $UNIQUE_VERSION --no-git-tag-version
+    - npm version patch --no-git-tag-version
     - npm ci
     - npm publish --tag latest
-    - npm version $BASE_VERSION --no-git-tag-version
   only:
     - pushes
 
