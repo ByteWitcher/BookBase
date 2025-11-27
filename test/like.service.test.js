@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
-import likeService from '../../src/services/like.service.js';
-import likeRepository from '../../src/repositories/like.repository.js';
-import Book from '../../src/entities/book.entity.js';
+import likeService from '../src/services/like.service.js';
+import likeRepository from '../src/repositories/like.repository.js';
+import Book from '../src/entities/book.entity.js';
 
 describe('LikeService', () => {
 
@@ -26,7 +26,7 @@ describe('LikeService', () => {
         it('throws if book is not visible', async () => {
             sinon.stub(Book, 'findByPk').resolves({
                 id: 'book-1',
-                visibility: false,
+                isActive: false,
                 addedById: 'user-2'
             });
 
@@ -41,8 +41,8 @@ describe('LikeService', () => {
         it('throws if user tries to like their own book', async () => {
             sinon.stub(Book, 'findByPk').resolves({
                 id: 'book-1',
-                visibility: true,
-                addedById: 'user-1' // Même user
+                isActive: true,
+                addedById: 'user-1'
             });
 
             try {
@@ -58,7 +58,7 @@ describe('LikeService', () => {
 
             sinon.stub(Book, 'findByPk').resolves({
                 id: 'book-1',
-                visibility: true,
+                isActive: true,
                 addedById: 'user-2',
                 update: updateStub
             });
@@ -79,7 +79,7 @@ describe('LikeService', () => {
 
             sinon.stub(Book, 'findByPk').resolves({
                 id: 'book-1',
-                visibility: true,
+                isActive: true,
                 addedById: 'user-2',
                 update: updateStub
             });

@@ -1,15 +1,19 @@
-// repositories/like.repository.js
-import Like from '../entities/like.entity.js';
 import User from '../entities/user.entity.js';
 import Book from '../entities/book.entity.js';
 
 class LikeRepository {
 
-   // Ajouter un like
-
   async addLike(userId, bookId) {
     try {
-      return await Like.create({ userId, bookId });
+      const user = await User.findByPk(userId);
+      if (!user) throw new Error('User not found');
+
+      const book = await Book.findByPk(bookId);
+      if (!book) throw new Error('Book not found');
+
+      await user.addLikedBook(book);
+      
+      return { userId, bookId };
     } catch (error) {
       if (error.name === 'SequelizeUniqueConstraintError') {
         throw new Error('Book already liked');
@@ -19,48 +23,47 @@ class LikeRepository {
   }
 
 
-   // Retirer un like
-
   async removeLike(userId, bookId) {
-    const deleted = await Like.destroy({
-      where: { userId, bookId }
-    });
-    return deleted;
+    const user = await User.findByPk(userId);
+    if (!user) return 0;
+
+    const book = await Book.findByPk(bookId);
+    if (!book) return 0;
+
+    const removed = await user.removeLikedBook(book);
+    return removed > 0 ? 1 : 0;
   }
 
-  
-   // Récupérer les utilisateurs qui ont liké un livre
 
   async getBookLikes(bookId) {
-    return await Like.findAll({
-      where: { bookId },
-      include: [
-        {
-          model: User,
-          as: 'user',
-          attributes: ['id', 'username']
-        }
-      ]
+    const book = await Book.findByPk(bookId);
+    if (!book) return [];
+
+    const users = await book.getLikedByUsers({
+      attributes: ['id', 'username'],
+      joinTableAttributes: []
     });
+
+    return users.map(user => ({ user }));
   }
 
-  
-   // Compter le nombre de likes d'un livre
    
   async countBookLikes(bookId) {
-    return await Like.count({
-      where: { bookId }
-    });
+    const book = await Book.findByPk(bookId);
+    if (!book) return 0;
+
+    return await book.countLikedByUsers();
   }
 
   
-   // Vérifier si un utilisateur a liké un livre
-  
   async isLiked(userId, bookId) {
-    const like = await Like.findOne({
-      where: { userId, bookId }
-    });
-    return !!like;
+    const user = await User.findByPk(userId);
+    if (!user) return false;
+
+    const book = await Book.findByPk(bookId);
+    if (!book) return false;
+
+    return await user.hasLikedBook(book);
   }
 }
 

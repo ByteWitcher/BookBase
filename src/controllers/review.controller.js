@@ -1,4 +1,6 @@
 import reviewService from '../services/review.service.js';
+import Book from '../entities/book.entity.js';
+
 
 class ReviewController {
   async createReview(req, res) {
@@ -22,11 +24,10 @@ class ReviewController {
         data: review
       });
     } catch (error) {
-      // ✅ Gestion d'erreurs améliorée
       let statusCode = 500;
       if (error.message.includes('not found')) statusCode = 404;
       else if (error.message.includes('cannot')) statusCode = 403;
-      else if (error.message.includes('already')) statusCode = 409;  // ✅ Fonctionne maintenant
+      else if (error.message.includes('already')) statusCode = 409;
       else if (error.message.includes('Rating must be')) statusCode = 400;
       
       res.status(statusCode).json({
@@ -84,7 +85,7 @@ class ReviewController {
       res.status(200).json({
         success: true,
         message: result.message,
-        data: { reviewId }  // ✅ Ajouté pour cohérence
+        data: { reviewId }
       });
     } catch (error) {
       let statusCode = 500;
@@ -97,7 +98,6 @@ class ReviewController {
       });
     }
   }
-
   async getBookReviews(req, res) {
     try {
       const { id: bookId } = req.params;
@@ -105,9 +105,14 @@ class ReviewController {
       const offset = parseInt(req.query.offset) || 0;
 
       const result = await reviewService.getBookReviews(bookId, { limit, offset });
-      
+
+      const book = await Book.findByPk(bookId);
+      if (!book) throw new Error('Book not found');
+      const averageRating = book.averageRating || 0;
+
       res.status(200).json({
         success: true,
+        averageRating,
         data: result.reviews,
         pagination: {
           page: result.page,
@@ -120,7 +125,7 @@ class ReviewController {
     } catch (error) {
       let statusCode = 500;
       if (error.message.includes('not found')) statusCode = 404;
-      
+
       res.status(statusCode).json({
         success: false,
         error: error.message

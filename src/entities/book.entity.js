@@ -7,32 +7,77 @@ const Book = sequelize.define('Book', {
     primaryKey: true,
     defaultValue: DataTypes.UUIDV4
   },
-  title: DataTypes.STRING,
-  // ... autres champs
+  title: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  languageCode: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  },
+  authors: {
+    type: DataTypes.ARRAY(DataTypes.STRING),
+    allowNull: false
+  },
+  pageNumbers: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  releaseDate: {
+    type: DataTypes.DATE
+  },
+  s3PdfUrl: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  averageRating: {
+    type: DataTypes.FLOAT,
+    defaultValue: 0
+  },
+  totalLikes: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  isActive: {
+  type: DataTypes.BOOLEAN,
+  allowNull: false,
+  defaultValue: false,
+  },
+  addedById: {
+    type: DataTypes.UUID,
+    allowNull: true
+  }
+}, {
+  timestamps: true,
 });
 
-// AJOUTER cette partie
 Book.associate = (models) => {
-  // Reviews
-  Book.hasMany(models.Review, { 
-    foreignKey: 'bookId', 
-    as: 'reviews' 
-  });
-  
-  // Favorites (Many-to-Many)
+  // Favorites
   Book.belongsToMany(models.User, {
-    through: models.Favorite,
+    through: 'Favorites',
+    foreignKey: 'bookId',
+    otherKey: 'userId',
     as: 'favoritedByUsers',
-    foreignKey: 'bookId',
-    otherKey: 'userId'
+    timestamps: true
   });
-  
-  // Likes (Many-to-Many)
+
+  // Likes
   Book.belongsToMany(models.User, {
-    through: models.Like,
-    as: 'likedByUsers',
+    through: 'Likes',
     foreignKey: 'bookId',
-    otherKey: 'userId'
+    otherKey: 'userId',
+    as: 'likedByUsers',
+    timestamps: true
+  });
+
+  // Reviews
+  Book.hasMany(models.Review, {
+    foreignKey: 'bookId',
+    as: 'reviews'
   });
 };
 

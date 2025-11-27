@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
-import reviewService from '../../src/services/review.service.js';
-import reviewRepository from '../../src/repositories/review.repository.js';
-import Book from '../../src/entities/book.entity.js';
+import reviewService from '../src/services/review.service.js';
+import reviewRepository from '../src/repositories/review.repository.js';
+import Book from '../src/entities/book.entity.js';
 
 describe('ReviewService', () => {
 
@@ -12,12 +12,12 @@ describe('ReviewService', () => {
     describe('createReview()', () => {
         afterEach(() => sinon.restore());
 
-        it('throws if rating is invalid (less than 0)', async () => {
+        it('throws if rating is invalid (less than 1)', async () => { 
             try {
-                await reviewService.createReview('user-1', 'book-1', -1, 'comment');
+                await reviewService.createReview('user-1', 'book-1', 0, 'comment'); 
                 throw new Error('Expected error');
             } catch (err) {
-                expect(err.message).to.equal('Rating must be between 0 and 5');
+                expect(err.message).to.equal('Rating must be between 1 and 5'); 
             }
         });
 
@@ -26,7 +26,7 @@ describe('ReviewService', () => {
                 await reviewService.createReview('user-1', 'book-1', 6, 'comment');
                 throw new Error('Expected error');
             } catch (err) {
-                expect(err.message).to.equal('Rating must be between 0 and 5');
+                expect(err.message).to.equal('Rating must be between 1 and 5'); 
             }
         });
 
@@ -44,7 +44,7 @@ describe('ReviewService', () => {
         it('throws if book is not visible', async () => {
             sinon.stub(Book, 'findByPk').resolves({
                 id: 'book-1',
-                visibility: false,
+                isActive: false,
                 addedById: 'user-2'
             });
 
@@ -59,8 +59,8 @@ describe('ReviewService', () => {
         it('throws if user tries to review their own book', async () => {
             sinon.stub(Book, 'findByPk').resolves({
                 id: 'book-1',
-                visibility: true,
-                addedById: 'user-1' // Même user
+                isActive: true,
+                addedById: 'user-1'
             });
 
             try {
@@ -74,7 +74,7 @@ describe('ReviewService', () => {
         it('throws if user already reviewed this book', async () => {
             sinon.stub(Book, 'findByPk').resolves({
                 id: 'book-1',
-                visibility: true,
+                isActive: true,
                 addedById: 'user-2'
             });
 
@@ -91,7 +91,7 @@ describe('ReviewService', () => {
         it('creates review successfully', async () => {
             sinon.stub(Book, 'findByPk').resolves({
                 id: 'book-1',
-                visibility: true,
+                isActive: true,
                 addedById: 'user-2'
             });
 
@@ -137,7 +137,7 @@ describe('ReviewService', () => {
         it('throws if user is not the author', async () => {
             sinon.stub(reviewRepository, 'getReviewById').resolves({
                 id: 'review-1',
-                userId: 'user-2', // Différent user
+                userId: 'user-2',
                 bookId: 'book-1',
                 rating: 4
             });
@@ -162,7 +162,7 @@ describe('ReviewService', () => {
                 await reviewService.updateReview('review-1', 'user-1', { rating: 10 });
                 throw new Error('Expected error');
             } catch (err) {
-                expect(err.message).to.equal('Rating must be between 0 and 5');
+                expect(err.message).to.equal('Rating must be between 1 and 5');
             }
         });
 
@@ -183,8 +183,8 @@ describe('ReviewService', () => {
             });
 
             sinon.stub(reviewRepository, 'calculateAverageRating').resolves({
-                averageRating: 5,
-                totalReviews: 1
+                averageRating: 4.8,
+                totalReviews: 5
             });
 
             sinon.stub(Book, 'update').resolves([1]);
@@ -247,9 +247,10 @@ describe('ReviewService', () => {
 
             sinon.stub(Book, 'update').resolves([1]);
 
-            const result = await reviewService.deleteReview('review-1', 'user-1', true); // isAdmin = true
+            const result = await reviewService.deleteReview('review-1', 'user-1', true);
 
             expect(result.message).to.equal('Review deleted successfully');
+            expect(result.reviewId).to.equal('review-1');
         });
 
         it('allows author to delete their own review', async () => {
@@ -259,18 +260,20 @@ describe('ReviewService', () => {
                 bookId: 'book-1'
             });
 
-            sinon.stub(reviewRepository, 'deleteReview').resolves(1);
+            sinon.stub(reviewRepository, 'deleteReview').resolves(true); 
 
             sinon.stub(reviewRepository, 'calculateAverageRating').resolves({
                 averageRating: 0,
                 totalReviews: 0
             });
 
-            sinon.stub(Book, 'update').resolves([1]);
+            const updateStub = sinon.stub(Book, 'update').resolves([1]);
 
             const result = await reviewService.deleteReview('review-1', 'user-1', false);
 
             expect(result.message).to.equal('Review deleted successfully');
+            expect(result.reviewId).to.equal('review-1'); 
+            expect(updateStub.calledOnce).to.be.true; 
         });
     });
 
@@ -307,6 +310,45 @@ describe('ReviewService', () => {
             expect(result.reviews).to.have.lengthOf(2);
             expect(result.total).to.equal(2);
             expect(result.page).to.equal(1);
+        });
+    });
+    // ============================================
+    // recalculateBookRating()
+    // ============================================
+    describe('recalculateBookRating()', () => {
+        afterEach(() => sinon.restore());
+
+        it('should recalculate and update book average rating', async () => {
+            sinon.stub(reviewRepository, 'calculateAverageRating').resolves({
+                averageRating: 4.3,
+                totalReviews: 10
+            });
+
+            const updateStub = sinon.stub(Book, 'update').resolves([1]);
+
+            const result = await reviewService.recalculateBookRating('book-1');
+
+            expect(result.averageRating).to.equal(4.3);
+            expect(result.totalReviews).to.equal(10);
+            
+            expect(updateStub.calledOnce).to.be.true;
+            expect(updateStub.firstCall.args[0]).to.deep.equal({ averageRating: 4.3 });
+        });
+
+        it('should handle zero reviews correctly', async () => {
+            sinon.stub(reviewRepository, 'calculateAverageRating').resolves({
+                averageRating: 0,
+                totalReviews: 0
+            });
+
+            const updateStub = sinon.stub(Book, 'update').resolves([1]);
+
+            const result = await reviewService.recalculateBookRating('book-1');
+
+            expect(result.averageRating).to.equal(0);
+            expect(result.totalReviews).to.equal(0);
+            
+            expect(updateStub.firstCall.args[0]).to.deep.equal({ averageRating: 0 });
         });
     });
 });

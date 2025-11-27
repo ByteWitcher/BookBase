@@ -3,7 +3,6 @@ import likeService from '../services/like.service.js';
 class LikeController {
   /**
    * POST /books/:id/like
-   * Toggle le like (ajoute si pas liké, retire si déjà liké)
    */
   async likeBook(req, res) {
     try {
@@ -18,7 +17,7 @@ class LikeController {
         data: {
           bookId: result.bookId,
           liked: result.liked,
-          action: result.liked ? 'LIKED' : 'UNLIKED',  // ✅ Ajouté pour le front
+          action: result.liked ? 'LIKED' : 'UNLIKED',
           totalLikes: result.totalLikes
         }
       });
@@ -35,11 +34,8 @@ class LikeController {
     }
   }
 
-  // ✅ SUPPRIMÉ : unlikeBook() - était redondant avec likeBook() qui fait déjà toggle
-
   /**
    * GET /books/:id/likes
-   * Récupérer les utilisateurs qui ont liké un livre
    */
   async getBookLikes(req, res) {
     try {

@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
-import favoriteService from '../../src/services/favorite.service.js';
-import favoriteRepository from '../../src/repositories/favorite.repository.js';
-import Book from '../../src/entities/book.entity.js';
+import favoriteService from '../src/services/favorite.service.js';
+import favoriteRepository from '../src/repositories/favorite.repository.js';
+import Book from '../src/entities/book.entity.js';
 
 describe('FavoriteService', () => {
 
@@ -25,7 +25,7 @@ describe('FavoriteService', () => {
             sinon.stub(Book, 'findByPk').resolves({
                 id: 'book-1',
                 title: 'Test Book',
-                visibility: false
+                isActive: false
             });
 
             try {
@@ -40,7 +40,7 @@ describe('FavoriteService', () => {
             sinon.stub(Book, 'findByPk').resolves({
                 id: 'book-1',
                 title: 'Test Book',
-                visibility: true
+                isActive: true
             });
 
             sinon.stub(favoriteRepository, 'addFavorite').resolves({
@@ -58,7 +58,7 @@ describe('FavoriteService', () => {
             sinon.stub(Book, 'findByPk').resolves({
                 id: 'book-1',
                 title: 'Test Book',
-                visibility: true
+                isActive: true
             });
 
             sinon.stub(favoriteRepository, 'addFavorite').rejects(new Error('Book already in favorites'));
@@ -136,19 +136,20 @@ describe('FavoriteService', () => {
     });
 
     it('calculates pagination correctly', async () => {
-        sinon.stub(favoriteRepository, 'getUserFavorites').resolves({
-            rows: [
-                { book: { id: 'book-11', title: 'Book 11' } },
-            ],
-            count: 25 
-        });
+    sinon.stub(favoriteRepository, 'getUserFavorites').resolves({
+        rows: [
+            { book: { id: 'book-11', title: 'Book 11' } },
+            { book: { id: 'book-12', title: 'Book 12' } } 
+        ],
+        count: 25
+    });
 
-        const result = await favoriteService.getUserFavorites('user-1', { limit: 10, offset: 10 });
+    const result = await favoriteService.getUserFavorites('user-1', { limit: 10, offset: 10 });
 
-        expect(result.favorites).to.have.lengthOf(2);
-        expect(result.total).to.equal(25);
-        expect(result.page).to.equal(2);      
-        expect(result.totalPages).to.equal(3);
+    expect(result.favorites).to.have.lengthOf(2); 
+    expect(result.total).to.equal(25);
+    expect(result.page).to.equal(2);
+    expect(result.totalPages).to.equal(3);
     });
 });
 });

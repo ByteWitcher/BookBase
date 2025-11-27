@@ -1,5 +1,6 @@
 import favoriteService from '../services/favorite.service.js';
 
+
 class FavoriteController {
   async addToFavorites(req, res) {
     try {
@@ -14,7 +15,6 @@ class FavoriteController {
         data: { bookId: result.bookId }
       });
     } catch (error) {
-      // ✅ Gestion d'erreurs améliorée avec 500 pour erreurs inattendues
       let statusCode = 500;
       if (error.message.includes('not found')) statusCode = 404;
       else if (error.message.includes('already')) statusCode = 409;
@@ -40,7 +40,6 @@ class FavoriteController {
         data: { bookId: result.bookId }
       });
     } catch (error) {
-      // ✅ Gestion d'erreurs améliorée
       let statusCode = 500;
       if (error.message.includes('not found')) statusCode = 404;
       

@@ -7,32 +7,52 @@ const User = sequelize.define('User', {
     primaryKey: true,
     defaultValue: DataTypes.UUIDV4
   },
-  username: DataTypes.STRING,
-  // ... autres champs
+  username: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  role: {
+    type: DataTypes.ENUM('USER', 'ADMIN'),
+    defaultValue: 'USER',
+    allowNull: false
+  }
+}, {
+  timestamps: true,
 });
 
-// AJOUTER cette partie
 User.associate = (models) => {
-  // Reviews
-  User.hasMany(models.Review, { 
-    foreignKey: 'userId', 
-    as: 'reviews' 
-  });
-  
-  // Favorites (Many-to-Many)
+  // Favorites
   User.belongsToMany(models.Book, {
-    through: models.Favorite,
+    through: 'Favorites',
+    foreignKey: 'userId',
+    otherKey: 'bookId',
     as: 'favoriteBooks',
-    foreignKey: 'userId',
-    otherKey: 'bookId'
+    timestamps: true
   });
-  
-  // Likes (Many-to-Many)
+
+  // Likes
   User.belongsToMany(models.Book, {
-    through: models.Like,
-    as: 'likedBooks',
+    through: 'Likes',
     foreignKey: 'userId',
-    otherKey: 'bookId'
+    otherKey: 'bookId',
+    as: 'likedBooks',
+    timestamps: true
+  });
+
+  // Reviews
+  User.hasMany(models.Review, {
+    foreignKey: 'userId',
+    as: 'reviews'
   });
 };
 
