@@ -1,31 +1,44 @@
-import ReadingAchievementRepository from '../repositories/readingAchievement.repository.js';
-import ReadingSessionRepository from '../repositories/readingSession.repository.js';
-import WeeklyReadingSummaryRepository from '../repositories/weeklyReadingSummary.repository.js';
+import ReadingAchievementRepository from "../repositories/readingAchievement.repository.js";
+import ReadingSessionRepository from "../repositories/readingSession.repository.js";
+import WeeklyReadingSummaryRepository from "../repositories/weeklyReadingSummary.repository.js";
 
 const STREAK_CODES = [
-  { code: 'STREAK_3', label: '3-Day Reading Streak', length: 3 },
-  { code: 'STREAK_5', label: '5-Day Reading Streak', length: 5 },
-  { code: 'STREAK_7', label: '7-Day Reading Streak', length: 7 },
-  { code: 'STREAK_14', label: '14-Day Reading Streak', length: 14 }
+  { code: "STREAK_3", label: "3-Day Reading Streak", length: 3 },
+  { code: "STREAK_5", label: "5-Day Reading Streak", length: 5 },
+  { code: "STREAK_7", label: "7-Day Reading Streak", length: 7 },
+  { code: "STREAK_14", label: "14-Day Reading Streak", length: 14 },
 ];
 
 const ACHIEVEMENTS = {
-  FIRST_SESSION: { code: 'FIRST_SESSION', label: 'First Reading Session' },
-  FIFTY_PAGES_ONE_DAY: { code: 'FIFTY_PAGES_ONE_DAY', label: 'Read 50 Pages in One Day' },
-  TEN_BOOKS_FINISHED: { code: 'TEN_BOOKS_FINISHED', label: 'Finished 10 Books' },
-  CONSISTENT_READER: { code: 'CONSISTENT_READER', label: 'Consistent Reader (4 Weeks)' }
+  FIRST_SESSION: { code: "FIRST_SESSION", label: "First Reading Session" },
+  FIFTY_PAGES_ONE_DAY: {
+    code: "FIFTY_PAGES_ONE_DAY",
+    label: "Read 50 Pages in One Day",
+  },
+  TEN_BOOKS_FINISHED: {
+    code: "TEN_BOOKS_FINISHED",
+    label: "Finished 10 Books",
+  },
+  CONSISTENT_READER: {
+    code: "CONSISTENT_READER",
+    label: "Consistent Reader (4 Weeks)",
+  },
 };
 
 class ReadingAchievementService {
-  
   async checkAndUnlockAchievements(userId, sessionData) {
     const unlocked = await ReadingAchievementRepository.findAllByUser(userId);
-    const unlockedCodes = new Set(unlocked.map(a => a.code));
+    const unlockedCodes = new Set(unlocked.map((a) => a.code));
     const newAchievements = [];
 
     // First session
-    if (!unlockedCodes.has('FIRST_SESSION') && await this.checkFirstSession(userId)) {
-      newAchievements.push(await this.unlock(userId, ACHIEVEMENTS.FIRST_SESSION));
+    if (
+      !unlockedCodes.has("FIRST_SESSION") &&
+      (await this.checkFirstSession(userId))
+    ) {
+      newAchievements.push(
+        await this.unlock(userId, ACHIEVEMENTS.FIRST_SESSION),
+      );
     }
     // Streak achievements
     const highestStreak = await this.getLongestStreak(userId);
@@ -37,16 +50,31 @@ class ReadingAchievementService {
       }
     }
     // 50 pages in one day
-    if (!unlockedCodes.has('FIFTY_PAGES_ONE_DAY') && await this.checkFiftyPagesOneDay(userId, sessionData)) {
-      newAchievements.push(await this.unlock(userId, ACHIEVEMENTS.FIFTY_PAGES_ONE_DAY));
+    if (
+      !unlockedCodes.has("FIFTY_PAGES_ONE_DAY") &&
+      (await this.checkFiftyPagesOneDay(userId, sessionData))
+    ) {
+      newAchievements.push(
+        await this.unlock(userId, ACHIEVEMENTS.FIFTY_PAGES_ONE_DAY),
+      );
     }
     // Ten books finished
-    if (!unlockedCodes.has('TEN_BOOKS_FINISHED') && await this.checkTenBooksFinished(userId)) {
-      newAchievements.push(await this.unlock(userId, ACHIEVEMENTS.TEN_BOOKS_FINISHED));
+    if (
+      !unlockedCodes.has("TEN_BOOKS_FINISHED") &&
+      (await this.checkTenBooksFinished(userId))
+    ) {
+      newAchievements.push(
+        await this.unlock(userId, ACHIEVEMENTS.TEN_BOOKS_FINISHED),
+      );
     }
     // Consistent reader
-    if (!unlockedCodes.has('CONSISTENT_READER') && await this.checkConsistentReader(userId)) {
-      newAchievements.push(await this.unlock(userId, ACHIEVEMENTS.CONSISTENT_READER));
+    if (
+      !unlockedCodes.has("CONSISTENT_READER") &&
+      (await this.checkConsistentReader(userId))
+    ) {
+      newAchievements.push(
+        await this.unlock(userId, ACHIEVEMENTS.CONSISTENT_READER),
+      );
     }
     return newAchievements;
   }
@@ -56,7 +84,7 @@ class ReadingAchievementService {
       userId,
       code,
       label,
-      unlockedAt: new Date()
+      unlockedAt: new Date(),
     });
   }
 
@@ -67,8 +95,13 @@ class ReadingAchievementService {
 
   async getLongestStreak(userId) {
     const sessions = await ReadingSessionRepository.findAllByUser(userId);
-    const days = Array.from(new Set(sessions.map(s => new Date(s.startTime).toISOString().slice(0, 10)))).sort();
-    let maxStreak = 0, currentStreak = 1;
+    const days = Array.from(
+      new Set(
+        sessions.map((s) => new Date(s.startTime).toISOString().slice(0, 10)),
+      ),
+    ).sort();
+    let maxStreak = 0,
+      currentStreak = 1;
     for (let i = 1; i < days.length; i++) {
       const prev = new Date(days[i - 1]);
       const curr = new Date(days[i]);
@@ -84,7 +117,9 @@ class ReadingAchievementService {
 
   async checkFiftyPagesOneDay(userId, sessionData) {
     // Get all sessions for the user on the same day
-    const targetDay = new Date(sessionData.startTime).toISOString().slice(0, 10);
+    const targetDay = new Date(sessionData.startTime)
+      .toISOString()
+      .slice(0, 10);
     const sessions = await ReadingSessionRepository.findAllByUser(userId);
     let totalPages = 0;
     for (const s of sessions) {
@@ -96,12 +131,11 @@ class ReadingAchievementService {
     return totalPages >= 50;
   }
 
-
   async checkTenBooksFinished(userId) {
     const sessions = await ReadingSessionRepository.findAllByUser(userId);
     const finishedBooks = new Set();
     // Import Book model here to avoid circular dependency at top
-    const { Book } = (await import('../entities/index.js')).default;
+    const { Book } = (await import("../entities/index.js")).default;
     for (const s of sessions) {
       const book = await Book.findByPk(s.bookId);
       if (book && s.endPage === book.pageCount) {
@@ -113,8 +147,9 @@ class ReadingAchievementService {
 
   async checkConsistentReader(userId) {
     // Check if user has summaries for at least 4 consecutive weeks
-    const summaries = await WeeklyReadingSummaryRepository.findAllByUser(userId);
-    const weeks = summaries.map(s => s.weekStart).sort();
+    const summaries =
+      await WeeklyReadingSummaryRepository.findAllByUser(userId);
+    const weeks = summaries.map((s) => s.weekStart).sort();
     for (let i = 0; i < weeks.length - 3; i++) {
       const w1 = new Date(weeks[i]);
       const w2 = new Date(weeks[i + 1]);
@@ -124,7 +159,8 @@ class ReadingAchievementService {
         w2 - w1 === 7 * 86400000 &&
         w3 - w2 === 7 * 86400000 &&
         w4 - w3 === 7 * 86400000
-      ) return true;
+      )
+        return true;
     }
     return false;
   }

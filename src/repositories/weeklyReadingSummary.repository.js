@@ -1,9 +1,8 @@
-import models from '../entities/index.js';
+import models from "../entities/index.js";
 
 const { WeeklyReadingSummary } = models;
 
 class WeeklyReadingSummaryRepository {
-    
   async create(data) {
     return await WeeklyReadingSummary.create(data);
   }
@@ -17,7 +16,9 @@ class WeeklyReadingSummaryRepository {
   }
 
   async findByWeekForUser(userId, weekStart, weekEnd) {
-    return await WeeklyReadingSummary.findOne({ where: { userId, weekStart, weekEnd } });
+    return await WeeklyReadingSummary.findOne({
+      where: { userId, weekStart, weekEnd },
+    });
   }
 
   async findAll({ where = {}, limit, offset, order } = {}) {

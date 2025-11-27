@@ -1,21 +1,25 @@
-import reviewRepository from '../repositories/review.repository.js';
-import Book from '../entities/book.entity.js';
+import reviewRepository from "../repositories/review.repository.js";
+import Book from "../entities/book.entity.js";
 
 class ReviewService {
-
   async createReview(userId, bookId, rating, comment) {
     if (rating < 1 || rating > 5) {
-      throw new Error('Rating must be between 1 and 5');
+      throw new Error("Rating must be between 1 and 5");
     }
 
     const book = await Book.findByPk(bookId);
-    if (!book) throw new Error('Book not found');
-    if (!book.isActive) throw new Error('Book is not available');
+    if (!book) throw new Error("Book not found");
+    if (!book.isActive) throw new Error("Book is not available");
     if (book.addedById === userId) {
-      throw new Error('You cannot review your own book');
+      throw new Error("You cannot review your own book");
     }
 
-    const review = await reviewRepository.createReview({ userId, bookId, rating, comment });
+    const review = await reviewRepository.createReview({
+      userId,
+      bookId,
+      rating,
+      comment,
+    });
 
     await this.recalculateBookRating(bookId);
 
@@ -24,11 +28,12 @@ class ReviewService {
 
   async updateReview(reviewId, userId, data) {
     const review = await reviewRepository.getReviewById(reviewId);
-    if (!review) throw new Error('Review not found');
-    if (review.userId !== userId) throw new Error('You are not authorized to update this review');
+    if (!review) throw new Error("Review not found");
+    if (review.userId !== userId)
+      throw new Error("You are not authorized to update this review");
 
     if (data.rating && (data.rating < 1 || data.rating > 5)) {
-      throw new Error('Rating must be between 1 and 5');
+      throw new Error("Rating must be between 1 and 5");
     }
 
     const updated = await reviewRepository.updateReview(reviewId, data);
@@ -40,9 +45,10 @@ class ReviewService {
 
   async deleteReview(reviewId, userId, isAdmin = false) {
     const review = await reviewRepository.getReviewById(reviewId);
-    if (!review) throw new Error('Review not found');
+    if (!review) throw new Error("Review not found");
 
-    if (!isAdmin && review.userId !== userId) throw new Error('You are not authorized to delete this review');
+    if (!isAdmin && review.userId !== userId)
+      throw new Error("You are not authorized to delete this review");
 
     await reviewRepository.deleteReview(reviewId);
 
@@ -50,17 +56,17 @@ class ReviewService {
 
     return {
       success: true,
-      message: 'Review deleted successfully',
-      reviewId
+      message: "Review deleted successfully",
+      reviewId,
     };
   }
 
   async getBookReviews(bookId, pagination = {}) {
     const book = await Book.findByPk(bookId);
-    if (!book) throw new Error('Book not found');
+    if (!book) throw new Error("Book not found");
 
     const result = await reviewRepository.getBookReviews(bookId, pagination);
-    
+
     const limit = pagination.limit || 10;
     const offset = pagination.offset || 0;
 
@@ -68,7 +74,7 @@ class ReviewService {
       reviews: result.rows,
       total: result.count,
       page: Math.floor(offset / limit) + 1,
-      totalPages: result.count ? Math.ceil(result.count / limit) : 0
+      totalPages: result.count ? Math.ceil(result.count / limit) : 0,
     };
   }
 
@@ -77,7 +83,7 @@ class ReviewService {
   }
 
   async recalculateBookRating(bookId) {
-    const { averageRating, totalReviews } = 
+    const { averageRating, totalReviews } =
       await reviewRepository.calculateAverageRating(bookId);
 
     await Book.update({ averageRating }, { where: { id: bookId } });
@@ -95,7 +101,7 @@ class ReviewService {
       reviews: result.rows,
       total: result.count,
       page: Math.floor(offset / limit) + 1,
-      totalPages: result.count ? Math.ceil(result.count / limit) : 0
+      totalPages: result.count ? Math.ceil(result.count / limit) : 0,
     };
   }
 }

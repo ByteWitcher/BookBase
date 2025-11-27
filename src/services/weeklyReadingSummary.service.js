@@ -1,25 +1,28 @@
-import models from '../entities/index.js';
-import WeeklyReadingSummaryRepository from '../repositories/weeklyReadingSummary.repository.js';
-import ReadingSessionRepository from '../repositories/readingSession.repository.js';
+import models from "../entities/index.js";
+import WeeklyReadingSummaryRepository from "../repositories/weeklyReadingSummary.repository.js";
+import ReadingSessionRepository from "../repositories/readingSession.repository.js";
 
 class WeeklyReadingSummaryService {
-
-    /**
-     * Generate current week's summaries for all users
-     * @param {string} weekStart - ISO date string
-     * @param {string} weekEnd - ISO date string
-     * @returns {Promise<Array>} Array of generated/updated summaries
-     */
-    async generateCurrentWeekSummariesForAllUsers(weekStart, weekEnd) {
-      // Get all user IDs (assumes User model is available via models)
-      const users = await models.User.findAll({ attributes: ['id'] });
-      const results = [];
-      for (const user of users) {
-        const summary = await this.generateSummaryFromSessions(user.id, weekStart, weekEnd);
-        results.push(summary);
-      }
-      return results;
+  /**
+   * Generate current week's summaries for all users
+   * @param {string} weekStart - ISO date string
+   * @param {string} weekEnd - ISO date string
+   * @returns {Promise<Array>} Array of generated/updated summaries
+   */
+  async generateCurrentWeekSummariesForAllUsers(weekStart, weekEnd) {
+    // Get all user IDs (assumes User model is available via models)
+    const users = await models.User.findAll({ attributes: ["id"] });
+    const results = [];
+    for (const user of users) {
+      const summary = await this.generateSummaryFromSessions(
+        user.id,
+        weekStart,
+        weekEnd,
+      );
+      results.push(summary);
     }
+    return results;
+  }
   async createSummary(data) {
     // Directly create a summary (expects all fields in data)
     return await WeeklyReadingSummaryRepository.create(data);
@@ -50,7 +53,7 @@ class WeeklyReadingSummaryService {
     // Filter sessions in week range
     const startDate = new Date(weekStart);
     const endDate = new Date(weekEnd);
-    const weekSessions = sessions.filter(s => {
+    const weekSessions = sessions.filter((s) => {
       const sessionStart = new Date(s.startTime);
       return sessionStart >= startDate && sessionStart <= endDate;
     });
@@ -64,20 +67,26 @@ class WeeklyReadingSummaryService {
       const end = new Date(session.endTime);
       const minutes = (end - start) / 60000;
       totalMinutes += minutes > 0 ? minutes : 0;
-      totalPages += session.pagesRead || (session.endPage - session.startPage);
+      totalPages += session.pagesRead || session.endPage - session.startPage;
       if (minutes > 0) {
-        totalSpeed += (session.pagesRead || (session.endPage - session.startPage)) / (minutes / 60);
+        totalSpeed +=
+          (session.pagesRead || session.endPage - session.startPage) /
+          (minutes / 60);
         speedCount++;
       }
     }
     const averageSpeed = speedCount > 0 ? totalSpeed / speedCount : 0;
     // Upsert summary
-    let summary = await WeeklyReadingSummaryRepository.findByWeekForUser(userId, weekStart, weekEnd);
+    let summary = await WeeklyReadingSummaryRepository.findByWeekForUser(
+      userId,
+      weekStart,
+      weekEnd,
+    );
     if (summary) {
       summary = await WeeklyReadingSummaryRepository.update(summary.id, {
         totalReadingMinutes: Math.round(totalMinutes),
         totalPagesRead: totalPages,
-        averageSpeed: Math.round(averageSpeed * 100) / 100
+        averageSpeed: Math.round(averageSpeed * 100) / 100,
       });
     } else {
       summary = await WeeklyReadingSummaryRepository.create({
@@ -86,7 +95,7 @@ class WeeklyReadingSummaryService {
         weekEnd,
         totalReadingMinutes: Math.round(totalMinutes),
         totalPagesRead: totalPages,
-        averageSpeed: Math.round(averageSpeed * 100) / 100
+        averageSpeed: Math.round(averageSpeed * 100) / 100,
       });
     }
     return summary;

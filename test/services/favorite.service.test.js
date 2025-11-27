@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import sinon from "sinon";
-import favoriteService from "../src/services/favorite.service.js";
-import favoriteRepository from "../src/repositories/favorite.repository.js";
-import Book from "../src/entities/book.entity.js";
+import favoriteService from "../../src/services/favorite.service.js";
+import favoriteRepository from "../../src/repositories/favorite.repository.js";
+import Book from "../../src/entities/book.entity.js";
 
 describe("FavoriteService", () => {
   // addToFavorites()

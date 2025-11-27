@@ -1,16 +1,15 @@
-import Review from '../entities/review.entity.js';
-import User from '../entities/user.entity.js';
-import Book from '../entities/book.entity.js';
-import sequelize from '../config/database.js';
+import Review from "../entities/review.entity.js";
+import User from "../entities/user.entity.js";
+import Book from "../entities/book.entity.js";
+import sequelize from "../config/database.js";
 
 class ReviewRepository {
-  
   async createReview(data) {
     try {
       return await Review.create(data);
     } catch (error) {
-      if (error.name === 'SequelizeUniqueConstraintError') {
-        throw new Error('Review already exists for this book');
+      if (error.name === "SequelizeUniqueConstraintError") {
+        throw new Error("Review already exists for this book");
       }
       throw error;
     }
@@ -18,19 +17,19 @@ class ReviewRepository {
 
   async updateReview(reviewId, data) {
     const [updated] = await Review.update(data, {
-      where: { id: reviewId }
+      where: { id: reviewId },
     });
-    
+
     if (updated === 0) {
-      throw new Error('Review not found');
+      throw new Error("Review not found");
     }
-    
+
     return await this.getReviewById(reviewId);
   }
 
   async deleteReview(reviewId) {
     const deleted = await Review.destroy({
-      where: { id: reviewId }
+      where: { id: reviewId },
     });
     return deleted > 0;
   }
@@ -41,20 +40,20 @@ class ReviewRepository {
       include: [
         {
           model: User,
-          as: 'user',
-          attributes: ['id', 'username']
-        }
+          as: "user",
+          attributes: ["id", "username"],
+        },
       ],
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
       limit,
-      offset
+      offset,
     });
   }
 
   // Récupérer la review d'un utilisateur pour un livre
   async getUserReview(userId, bookId) {
     return await Review.findOne({
-      where: { userId, bookId }
+      where: { userId, bookId },
     });
   }
 
@@ -63,15 +62,15 @@ class ReviewRepository {
       include: [
         {
           model: User,
-          as: 'user',
-          attributes: ['id', 'username']
+          as: "user",
+          attributes: ["id", "username"],
         },
         {
           model: Book,
-          as: 'book',
-          attributes: ['id', 'title']
-        }
-      ]
+          as: "book",
+          attributes: ["id", "title"],
+        },
+      ],
     });
   }
 
@@ -79,15 +78,15 @@ class ReviewRepository {
     const result = await Review.findOne({
       where: { bookId },
       attributes: [
-        [sequelize.fn('AVG', sequelize.col('rating')), 'avgRating'],
-        [sequelize.fn('COUNT', sequelize.col('id')), 'totalReviews']
+        [sequelize.fn("AVG", sequelize.col("rating")), "avgRating"],
+        [sequelize.fn("COUNT", sequelize.col("id")), "totalReviews"],
       ],
-      raw: true
+      raw: true,
     });
-    
+
     return {
       averageRating: Math.round((parseFloat(result?.avgRating) || 0) * 10) / 10,
-      totalReviews: parseInt(result?.totalReviews) || 0
+      totalReviews: parseInt(result?.totalReviews) || 0,
     };
   }
 
@@ -97,13 +96,13 @@ class ReviewRepository {
       include: [
         {
           model: Book,
-          as: 'book',
-          attributes: ['id', 'title', 'authors', 's3PdfUrl']
-        }
+          as: "book",
+          attributes: ["id", "title", "authors", "s3PdfUrl"],
+        },
       ],
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
       limit,
-      offset
+      offset,
     });
   }
 }

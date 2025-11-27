@@ -35,7 +35,6 @@ db.sequelize = sequelize;
 
 export default db;
 
-
 // import initReadingSession from './readingSession.entity.js';
 // import initReadingAchievement from './readingAchievement.entity.js';
 // import initWeeklyReadingSummary from './weeklyReadingSummary.entity.js';

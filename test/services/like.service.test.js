@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import sinon from "sinon";
-import likeService from "../src/services/like.service.js";
-import likeRepository from "../src/repositories/like.repository.js";
-import Book from "../src/entities/book.entity.js";
+import likeService from "../../src/services/like.service.js";
+import likeRepository from "../../src/repositories/like.repository.js";
+import Book from "../../src/entities/book.entity.js";
 
 describe("LikeService", () => {
   // ============================================

@@ -80,28 +80,28 @@ Book.associate = (models) => {
   Book.belongsTo(models.User, { foreignKey: "userId", as: "user" });
   Book.belongsTo(models.User, { foreignKey: "adminId", as: "admin" });
   Book.hasOne(models.BookRequest, { foreignKey: "bookId", as: "bookRequest" });
-   // Favorites
+  // Favorites
   Book.belongsToMany(models.User, {
-    through: 'Favorites',
-    foreignKey: 'bookId',
-    otherKey: 'userId',
-    as: 'favoritedByUsers',
-    timestamps: true
+    through: "Favorites",
+    foreignKey: "bookId",
+    otherKey: "userId",
+    as: "favoritedByUsers",
+    timestamps: true,
   });
 
   // Likes
   Book.belongsToMany(models.User, {
-    through: 'Likes',
-    foreignKey: 'bookId',
-    otherKey: 'userId',
-    as: 'likedByUsers',
-    timestamps: true
+    through: "Likes",
+    foreignKey: "bookId",
+    otherKey: "userId",
+    as: "likedByUsers",
+    timestamps: true,
   });
 
   // Reviews
   Book.hasMany(models.Review, {
-    foreignKey: 'bookId',
-    as: 'reviews'
+    foreignKey: "bookId",
+    as: "reviews",
   });
 };
 

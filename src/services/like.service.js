@@ -1,15 +1,14 @@
-import likeRepository from '../repositories/like.repository.js';
-import Book from '../entities/book.entity.js';
+import likeRepository from "../repositories/like.repository.js";
+import Book from "../entities/book.entity.js";
 
 class LikeService {
-
   async toggleLike(userId, bookId) {
     const book = await Book.findByPk(bookId);
-    if (!book) throw new Error('Book not found');
-    if (!book.isActive) throw new Error('Book is not available');
+    if (!book) throw new Error("Book not found");
+    if (!book.isActive) throw new Error("Book is not available");
 
     if (book.addedById === userId) {
-      throw new Error('You cannot like your own book');
+      throw new Error("You cannot like your own book");
     }
 
     const isLiked = await likeRepository.isLiked(userId, bookId);
@@ -28,19 +27,19 @@ class LikeService {
       success: true,
       liked: !isLiked,
       totalLikes,
-      bookId
+      bookId,
     };
   }
 
   async getBookLikes(bookId) {
     const book = await Book.findByPk(bookId);
-    if (!book) throw new Error('Book not found');
+    if (!book) throw new Error("Book not found");
 
     const likes = await likeRepository.getBookLikes(bookId);
 
     return {
-      users: likes.map(l => l.user),
-      total: likes.length
+      users: likes.map((l) => l.user),
+      total: likes.length,
     };
   }
 

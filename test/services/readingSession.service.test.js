@@ -1,10 +1,10 @@
-import * as chai from 'chai';
-import chaiAsPromised from 'chai-as-promised';
-import sinonChai from 'sinon-chai';
-import sinon from 'sinon';
-import * as readingSessionServiceModule from '../../src/services/readingSession.service.js';
-import ReadingSessionRepository from '../../src/repositories/readingSession.repository.js';
-import models from '../../src/entities/index.js';
+import * as chai from "chai";
+import chaiAsPromised from "chai-as-promised";
+import sinonChai from "sinon-chai";
+import sinon from "sinon";
+import * as readingSessionServiceModule from "../../src/services/readingSession.service.js";
+import ReadingSessionRepository from "../../src/repositories/readingSession.repository.js";
+import models from "../../src/entities/index.js";
 
 // Configure Chai plugins
 chai.use(chaiAsPromised);
@@ -12,282 +12,412 @@ chai.use(sinonChai);
 
 const { expect } = chai;
 
-describe('validateSessionInput', () => {
+describe("validateSessionInput", () => {
   // Get the function from the imported module
-  const validateSessionInput = readingSessionServiceModule.validateSessionInput || readingSessionServiceModule.default?.validateSessionInput;
+  const validateSessionInput =
+    readingSessionServiceModule.validateSessionInput ||
+    readingSessionServiceModule.default?.validateSessionInput;
 
-  it('should throw if book is missing', () => {
-    expect(() => validateSessionInput({ book: null, startPage: 1, endPage: 10, startTime: '2025-11-22T10:00:00Z', endTime: '2025-11-22T11:00:00Z' }))
-      .to.throw('Book not found');
-  });
-
-  it('should throw if startPage < 1', () => {
-    expect(() => validateSessionInput({ book: { pageCount: 100 }, startPage: 0, endPage: 10, startTime: '2025-11-22T10:00:00Z', endTime: '2025-11-22T11:00:00Z' }))
-      .to.throw('Invalid page range for this book');
-  });
-
-  it('should throw if endPage > book.pageCount', () => {
-    expect(() => validateSessionInput({ book: { pageCount: 100 }, startPage: 1, endPage: 101, startTime: '2025-11-22T10:00:00Z', endTime: '2025-11-22T11:00:00Z' }))
-      .to.throw('Invalid page range for this book');
-  });
-
-  it('should throw if startPage > endPage', () => {
-    expect(() => validateSessionInput({ book: { pageCount: 100 }, startPage: 20, endPage: 10, startTime: '2025-11-22T10:00:00Z', endTime: '2025-11-22T11:00:00Z' }))
-      .to.throw('Invalid page range for this book');
-  });
-
-  it('should throw if startTime or endTime is missing', () => {
-    expect(() => validateSessionInput({ book: { pageCount: 100 }, startPage: 1, endPage: 10, startTime: null, endTime: '2025-11-22T11:00:00Z' }))
-      .to.throw('Start and end time are required');
-    expect(() => validateSessionInput({ book: { pageCount: 100 }, startPage: 1, endPage: 10, startTime: '2025-11-22T10:00:00Z', endTime: null }))
-      .to.throw('Start and end time are required');
-  });
-
-  it('should throw if startTime or endTime is invalid date', () => {
-    expect(() => validateSessionInput({ book: { pageCount: 100 }, startPage: 1, endPage: 10, startTime: 'invalid', endTime: '2025-11-22T11:00:00Z' }))
-      .to.throw('Invalid date format');
-    expect(() => validateSessionInput({ book: { pageCount: 100 }, startPage: 1, endPage: 10, startTime: '2025-11-22T10:00:00Z', endTime: 'invalid' }))
-      .to.throw('Invalid date format');
-  });
-
-  it('should throw if endTime <= startTime', () => {
-    expect(() => validateSessionInput({ book: { pageCount: 100 }, startPage: 1, endPage: 10, startTime: '2025-11-22T11:00:00Z', endTime: '2025-11-22T10:00:00Z' }))
-      .to.throw('End time must be after start time');
-    expect(() => validateSessionInput({ book: { pageCount: 100 }, startPage: 1, endPage: 10, startTime: '2025-11-22T10:00:00Z', endTime: '2025-11-22T10:00:00Z' }))
-      .to.throw('End time must be after start time');
-  });
-
-  it('should not throw for valid input', () => {
-    expect(() => validateSessionInput({ book: { pageCount: 100 }, startPage: 1, endPage: 10, startTime: '2025-11-22T10:00:00Z', endTime: '2025-11-22T11:00:00Z' }))
-      .to.not.throw();
-  });
-});
-
-describe('createSession', () => {
-    let bookStub;
-    const fakeSession = {
-      id: 'session1',
-      userId: 'user1',
-      bookId: 'book1',
-      startTime: new Date('2025-11-22T10:00:00Z'),
-      endTime: new Date('2025-11-22T11:00:00Z'),
-      startPage: 1,
-      endPage: 10
-    };
-    beforeEach(() => {
-      bookStub = sinon.stub(models.Book, 'findByPk');
-    });
-    afterEach(() => {
-      sinon.restore();
-    });
-
-    it('should create a session if input is valid', async () => {
-      bookStub.resolves({ id: 'book1', pageCount: 200 });
-      // Mock the repository create method
-      const repoCreate = sinon.stub(ReadingSessionRepository, 'create').resolves(fakeSession);
-      const result = await readingSessionServiceModule.default.createSession({
-        userId: 'user1',
-        bookId: 'book1',
-        startTime: '2025-11-22T10:00:00Z',
-        endTime: '2025-11-22T11:00:00Z',
+  it("should throw if book is missing", () => {
+    expect(() =>
+      validateSessionInput({
+        book: null,
         startPage: 1,
-        endPage: 10
-      });
-      expect(result).to.deep.equal(fakeSession);
-      expect(bookStub).to.have.been.calledWith('book1');
-      expect(repoCreate).to.have.been.called;
-    });
+        endPage: 10,
+        startTime: "2025-11-22T10:00:00Z",
+        endTime: "2025-11-22T11:00:00Z",
+      }),
+    ).to.throw("Book not found");
+  });
+
+  it("should throw if startPage < 1", () => {
+    expect(() =>
+      validateSessionInput({
+        book: { pageCount: 100 },
+        startPage: 0,
+        endPage: 10,
+        startTime: "2025-11-22T10:00:00Z",
+        endTime: "2025-11-22T11:00:00Z",
+      }),
+    ).to.throw("Invalid page range for this book");
+  });
+
+  it("should throw if endPage > book.pageCount", () => {
+    expect(() =>
+      validateSessionInput({
+        book: { pageCount: 100 },
+        startPage: 1,
+        endPage: 101,
+        startTime: "2025-11-22T10:00:00Z",
+        endTime: "2025-11-22T11:00:00Z",
+      }),
+    ).to.throw("Invalid page range for this book");
+  });
+
+  it("should throw if startPage > endPage", () => {
+    expect(() =>
+      validateSessionInput({
+        book: { pageCount: 100 },
+        startPage: 20,
+        endPage: 10,
+        startTime: "2025-11-22T10:00:00Z",
+        endTime: "2025-11-22T11:00:00Z",
+      }),
+    ).to.throw("Invalid page range for this book");
+  });
+
+  it("should throw if startTime or endTime is missing", () => {
+    expect(() =>
+      validateSessionInput({
+        book: { pageCount: 100 },
+        startPage: 1,
+        endPage: 10,
+        startTime: null,
+        endTime: "2025-11-22T11:00:00Z",
+      }),
+    ).to.throw("Start and end time are required");
+    expect(() =>
+      validateSessionInput({
+        book: { pageCount: 100 },
+        startPage: 1,
+        endPage: 10,
+        startTime: "2025-11-22T10:00:00Z",
+        endTime: null,
+      }),
+    ).to.throw("Start and end time are required");
+  });
+
+  it("should throw if startTime or endTime is invalid date", () => {
+    expect(() =>
+      validateSessionInput({
+        book: { pageCount: 100 },
+        startPage: 1,
+        endPage: 10,
+        startTime: "invalid",
+        endTime: "2025-11-22T11:00:00Z",
+      }),
+    ).to.throw("Invalid date format");
+    expect(() =>
+      validateSessionInput({
+        book: { pageCount: 100 },
+        startPage: 1,
+        endPage: 10,
+        startTime: "2025-11-22T10:00:00Z",
+        endTime: "invalid",
+      }),
+    ).to.throw("Invalid date format");
+  });
+
+  it("should throw if endTime <= startTime", () => {
+    expect(() =>
+      validateSessionInput({
+        book: { pageCount: 100 },
+        startPage: 1,
+        endPage: 10,
+        startTime: "2025-11-22T11:00:00Z",
+        endTime: "2025-11-22T10:00:00Z",
+      }),
+    ).to.throw("End time must be after start time");
+    expect(() =>
+      validateSessionInput({
+        book: { pageCount: 100 },
+        startPage: 1,
+        endPage: 10,
+        startTime: "2025-11-22T10:00:00Z",
+        endTime: "2025-11-22T10:00:00Z",
+      }),
+    ).to.throw("End time must be after start time");
+  });
+
+  it("should not throw for valid input", () => {
+    expect(() =>
+      validateSessionInput({
+        book: { pageCount: 100 },
+        startPage: 1,
+        endPage: 10,
+        startTime: "2025-11-22T10:00:00Z",
+        endTime: "2025-11-22T11:00:00Z",
+      }),
+    ).to.not.throw();
+  });
 });
 
-describe('updateSession', () => {
+describe("createSession", () => {
+  let bookStub;
+  const fakeSession = {
+    id: "session1",
+    userId: "user1",
+    bookId: "book1",
+    startTime: new Date("2025-11-22T10:00:00Z"),
+    endTime: new Date("2025-11-22T11:00:00Z"),
+    startPage: 1,
+    endPage: 10,
+  };
+  beforeEach(() => {
+    bookStub = sinon.stub(models.Book, "findByPk");
+  });
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  it("should create a session if input is valid", async () => {
+    bookStub.resolves({ id: "book1", pageCount: 200 });
+    // Mock the repository create method
+    const repoCreate = sinon
+      .stub(ReadingSessionRepository, "create")
+      .resolves(fakeSession);
+    const result = await readingSessionServiceModule.default.createSession({
+      userId: "user1",
+      bookId: "book1",
+      startTime: "2025-11-22T10:00:00Z",
+      endTime: "2025-11-22T11:00:00Z",
+      startPage: 1,
+      endPage: 10,
+    });
+    expect(result).to.deep.equal(fakeSession);
+    expect(bookStub).to.have.been.calledWith("book1");
+    expect(repoCreate).to.have.been.called;
+  });
+});
+
+describe("updateSession", () => {
   let bookStub, repoFindStub, repoUpdateStub;
   const ReadingSessionService = readingSessionServiceModule.default;
   const fakeSession = {
-    id: 'session1',
-    userId: 'user1',
-    bookId: 'book1',
-    startTime: '2025-11-22T10:00:00Z',
-    endTime: '2025-11-22T11:00:00Z',
+    id: "session1",
+    userId: "user1",
+    bookId: "book1",
+    startTime: "2025-11-22T10:00:00Z",
+    endTime: "2025-11-22T11:00:00Z",
     startPage: 1,
-    endPage: 10
+    endPage: 10,
   };
   beforeEach(() => {
-    repoFindStub = sinon.stub(ReadingSessionRepository, 'findById').resolves(fakeSession);
-    bookStub = sinon.stub(models.Book, 'findByPk').resolves({ id: 'book1', pageCount: 200 });
-    repoUpdateStub = sinon.stub(ReadingSessionRepository, 'update').resolves({ ...fakeSession, startPage: 2 });
+    repoFindStub = sinon
+      .stub(ReadingSessionRepository, "findById")
+      .resolves(fakeSession);
+    bookStub = sinon
+      .stub(models.Book, "findByPk")
+      .resolves({ id: "book1", pageCount: 200 });
+    repoUpdateStub = sinon
+      .stub(ReadingSessionRepository, "update")
+      .resolves({ ...fakeSession, startPage: 2 });
   });
   afterEach(() => {
     sinon.restore();
   });
 
-  it('should update a session if input is valid', async () => {
-    const result = await ReadingSessionService.updateSession('session1', { startPage: 2 });
+  it("should update a session if input is valid", async () => {
+    const result = await ReadingSessionService.updateSession("session1", {
+      startPage: 2,
+    });
     expect(result).to.deep.equal({ ...fakeSession, startPage: 2 });
-    expect(repoFindStub).to.have.been.calledWith('session1');
-    expect(bookStub).to.have.been.calledWith('book1');
+    expect(repoFindStub).to.have.been.calledWith("session1");
+    expect(bookStub).to.have.been.calledWith("book1");
     expect(repoUpdateStub).to.have.been.called;
   });
 
-  it('should throw if session not found', async () => {
+  it("should throw if session not found", async () => {
     repoFindStub.onFirstCall().resolves(null);
-    await expect(ReadingSessionService.updateSession('badid', { startPage: 2 })).to.be.rejectedWith('Session not found');
+    await expect(
+      ReadingSessionService.updateSession("badid", { startPage: 2 }),
+    ).to.be.rejectedWith("Session not found");
   });
 });
 
-describe('deleteSession', () => {
+describe("deleteSession", () => {
   let repoDeleteStub;
   const ReadingSessionService = readingSessionServiceModule.default;
   beforeEach(() => {
-    repoDeleteStub = sinon.stub(ReadingSessionRepository, 'delete').resolves(true);
+    repoDeleteStub = sinon
+      .stub(ReadingSessionRepository, "delete")
+      .resolves(true);
   });
   afterEach(() => {
     sinon.restore();
   });
 
-  it('should call repository delete and return result', async () => {
-    const result = await ReadingSessionService.deleteSession('session1');
+  it("should call repository delete and return result", async () => {
+    const result = await ReadingSessionService.deleteSession("session1");
     expect(result).to.equal(true);
-    expect(repoDeleteStub).to.have.been.calledWith('session1');
+    expect(repoDeleteStub).to.have.been.calledWith("session1");
   });
 });
 
-describe('getSessionById', () => {
+describe("getSessionById", () => {
   let repoFindStub;
   const ReadingSessionService = readingSessionServiceModule.default;
   beforeEach(() => {
-    repoFindStub = sinon.stub(ReadingSessionRepository, 'findById').resolves({ id: 'session1' });
+    repoFindStub = sinon
+      .stub(ReadingSessionRepository, "findById")
+      .resolves({ id: "session1" });
   });
   afterEach(() => {
     sinon.restore();
   });
 
-  it('should return the session if found', async () => {
-    const result = await ReadingSessionService.getSessionById('session1');
-    expect(result).to.deep.equal({ id: 'session1' });
-    expect(repoFindStub).to.have.been.calledWith('session1');
+  it("should return the session if found", async () => {
+    const result = await ReadingSessionService.getSessionById("session1");
+    expect(result).to.deep.equal({ id: "session1" });
+    expect(repoFindStub).to.have.been.calledWith("session1");
   });
 });
 
-describe('getAllSessionsByUser', () => {
+describe("getAllSessionsByUser", () => {
   let repoFindAllStub;
   const ReadingSessionService = readingSessionServiceModule.default;
   const fakeSessions = [
-    { id: 'session1', userId: 'user1', bookId: 'book1' },
-    { id: 'session2', userId: 'user1', bookId: 'book2' }
+    { id: "session1", userId: "user1", bookId: "book1" },
+    { id: "session2", userId: "user1", bookId: "book2" },
   ];
   beforeEach(() => {
-    repoFindAllStub = sinon.stub(ReadingSessionRepository, 'findAllByUser').resolves(fakeSessions);
+    repoFindAllStub = sinon
+      .stub(ReadingSessionRepository, "findAllByUser")
+      .resolves(fakeSessions);
   });
   afterEach(() => {
     sinon.restore();
   });
 
-  it('should return all sessions for a user', async () => {
-    const result = await ReadingSessionService.getAllSessionsByUser('user1');
+  it("should return all sessions for a user", async () => {
+    const result = await ReadingSessionService.getAllSessionsByUser("user1");
     expect(result).to.deep.equal(fakeSessions);
-    expect(repoFindAllStub).to.have.been.calledWith('user1');
+    expect(repoFindAllStub).to.have.been.calledWith("user1");
   });
 });
 
-describe('getLatestSessionByUserAndBook', () => {
+describe("getLatestSessionByUserAndBook", () => {
   let repoFindAllStub;
   const ReadingSessionService = readingSessionServiceModule.default;
   const fakeSessions = [
-    { id: 'session1', userId: 'user1', bookId: 'book1', endTime: '2025-11-22T10:00:00Z' },
-    { id: 'session2', userId: 'user1', bookId: 'book1', endTime: '2025-11-22T12:00:00Z' },
-    { id: 'session3', userId: 'user1', bookId: 'book2', endTime: '2025-11-22T11:00:00Z' }
+    {
+      id: "session1",
+      userId: "user1",
+      bookId: "book1",
+      endTime: "2025-11-22T10:00:00Z",
+    },
+    {
+      id: "session2",
+      userId: "user1",
+      bookId: "book1",
+      endTime: "2025-11-22T12:00:00Z",
+    },
+    {
+      id: "session3",
+      userId: "user1",
+      bookId: "book2",
+      endTime: "2025-11-22T11:00:00Z",
+    },
   ];
   beforeEach(() => {
-    repoFindAllStub = sinon.stub(ReadingSessionRepository, 'findAllByUser').resolves(fakeSessions);
+    repoFindAllStub = sinon
+      .stub(ReadingSessionRepository, "findAllByUser")
+      .resolves(fakeSessions);
   });
   afterEach(() => {
     sinon.restore();
   });
 
-  it('should return the latest session for a user and book', async () => {
-    const result = await ReadingSessionService.getLatestSessionByUserAndBook('user1', 'book1');
+  it("should return the latest session for a user and book", async () => {
+    const result = await ReadingSessionService.getLatestSessionByUserAndBook(
+      "user1",
+      "book1",
+    );
     expect(result).to.deep.equal(fakeSessions[1]); // session2 is latest for book1
-    expect(repoFindAllStub).to.have.been.calledWith('user1');
+    expect(repoFindAllStub).to.have.been.calledWith("user1");
   });
 
-  it('should return null if no session for the book', async () => {
-    const result = await ReadingSessionService.getLatestSessionByUserAndBook('user1', 'book3');
+  it("should return null if no session for the book", async () => {
+    const result = await ReadingSessionService.getLatestSessionByUserAndBook(
+      "user1",
+      "book3",
+    );
     expect(result).to.be.null;
-    expect(repoFindAllStub).to.have.been.calledWith('user1');
+    expect(repoFindAllStub).to.have.been.calledWith("user1");
   });
 });
 
-describe('getUserBookProgress', () => {
+describe("getUserBookProgress", () => {
   let repoFindAllStub, bookFindStub;
   const ReadingSessionService = readingSessionServiceModule.default;
   const fakeSessions = [
-    { id: 'session1', userId: 'user1', bookId: 'book1', endPage: 10 },
-    { id: 'session2', userId: 'user1', bookId: 'book1', endPage: 25 }, // farther than previous
-    { id: 'session3', userId: 'user1', bookId: 'book2', endPage: 15 }
+    { id: "session1", userId: "user1", bookId: "book1", endPage: 10 },
+    { id: "session2", userId: "user1", bookId: "book1", endPage: 25 }, // farther than previous
+    { id: "session3", userId: "user1", bookId: "book2", endPage: 15 },
   ];
   const fakeBooks = {
-    book1: { id: 'book1', title: 'Book One' },
-    book2: { id: 'book2', title: 'Book Two' }
+    book1: { id: "book1", title: "Book One" },
+    book2: { id: "book2", title: "Book Two" },
   };
   beforeEach(() => {
-    repoFindAllStub = sinon.stub(ReadingSessionRepository, 'findAllByUser').resolves(fakeSessions);
-    bookFindStub = sinon.stub(models.Book, 'findByPk').callsFake(async (id) => fakeBooks[id]);
+    repoFindAllStub = sinon
+      .stub(ReadingSessionRepository, "findAllByUser")
+      .resolves(fakeSessions);
+    bookFindStub = sinon
+      .stub(models.Book, "findByPk")
+      .callsFake(async (id) => fakeBooks[id]);
   });
   afterEach(() => {
     sinon.restore();
   });
 
-  it('should return farthest page for each book the user read', async () => {
-    const result = await ReadingSessionService.getUserBookProgress('user1');
+  it("should return farthest page for each book the user read", async () => {
+    const result = await ReadingSessionService.getUserBookProgress("user1");
     expect(result).to.deep.equal([
-      { bookId: 'book1', title: 'Book One', farthestPage: 25 },
-      { bookId: 'book2', title: 'Book Two', farthestPage: 15 }
+      { bookId: "book1", title: "Book One", farthestPage: 25 },
+      { bookId: "book2", title: "Book Two", farthestPage: 15 },
     ]);
-    expect(repoFindAllStub).to.have.been.calledWith('user1');
-    expect(bookFindStub).to.have.been.calledWith('book1');
-    expect(bookFindStub).to.have.been.calledWith('book2');
+    expect(repoFindAllStub).to.have.been.calledWith("user1");
+    expect(bookFindStub).to.have.been.calledWith("book1");
+    expect(bookFindStub).to.have.been.calledWith("book2");
   });
 
-  describe('getLeaderboard', () => {
+  describe("getLeaderboard", () => {
     const ReadingSessionService = readingSessionServiceModule.default;
     const fakeLeaderboardRows = [
-      { userId: 'user1', totalPages: '100' },
-      { userId: 'user2', totalPages: '80' },
-      { userId: 'user3', totalPages: '50' }
+      { userId: "user1", totalPages: "100" },
+      { userId: "user2", totalPages: "80" },
+      { userId: "user3", totalPages: "50" },
     ];
     const fakeUsers = [
-      { id: 'user1', username: 'alice' },
-      { id: 'user2', username: 'bob' },
-      { id: 'user3', username: 'carol' }
+      { id: "user1", username: "alice" },
+      { id: "user2", username: "bob" },
+      { id: "user3", username: "carol" },
     ];
     beforeEach(() => {
-      sinon.stub(models.User, 'findAll').resolves(fakeUsers);
+      sinon.stub(models.User, "findAll").resolves(fakeUsers);
       if (!models.ReadingSession.sequelize) {
-        models.ReadingSession.sequelize = { QueryTypes: { SELECT: 'SELECT' } };
+        models.ReadingSession.sequelize = { QueryTypes: { SELECT: "SELECT" } };
       }
-      sinon.stub(models.ReadingSession.sequelize, 'query').resolves(fakeLeaderboardRows);
+      sinon
+        .stub(models.ReadingSession.sequelize, "query")
+        .resolves(fakeLeaderboardRows);
     });
     afterEach(() => {
       sinon.restore();
     });
 
-    it('should return leaderboard with userId, username, position, and totalPages', async () => {
+    it("should return leaderboard with userId, username, position, and totalPages", async () => {
       const result = await ReadingSessionService.getLeaderboard(3);
       expect(result).to.deep.equal([
-        { position: 1, userId: 'user1', username: 'alice', totalPages: 100 },
-        { position: 2, userId: 'user2', username: 'bob', totalPages: 80 },
-        { position: 3, userId: 'user3', username: 'carol', totalPages: 50 }
+        { position: 1, userId: "user1", username: "alice", totalPages: 100 },
+        { position: 2, userId: "user2", username: "bob", totalPages: 80 },
+        { position: 3, userId: "user3", username: "carol", totalPages: 50 },
       ]);
       expect(models.ReadingSession.sequelize.query).to.have.been.called;
-      expect(models.User.findAll).to.have.been.calledWithMatch({ where: { id: ['user1', 'user2', 'user3'] } });
+      expect(models.User.findAll).to.have.been.calledWithMatch({
+        where: { id: ["user1", "user2", "user3"] },
+      });
     });
 
-    it('should handle missing usernames gracefully', async () => {
+    it("should handle missing usernames gracefully", async () => {
       models.User.findAll.resolves([]); // No users found
-      models.ReadingSession.sequelize.query.resolves([{ userId: 'user1', totalPages: '100' }]);
+      models.ReadingSession.sequelize.query.resolves([
+        { userId: "user1", totalPages: "100" },
+      ]);
       const result = await ReadingSessionService.getLeaderboard(1);
       expect(result).to.deep.equal([
-        { position: 1, userId: 'user1', username: null, totalPages: 100 }
+        { position: 1, userId: "user1", username: null, totalPages: 100 },
       ]);
     });
   });

@@ -1,43 +1,47 @@
-import { DataTypes } from 'sequelize';
-import sequelize from '../config/database.js';
+import { DataTypes } from "sequelize";
+import sequelize from "../config/database.js";
 
-const Review = sequelize.define('Review', {
-  id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    primaryKey: true,
-  },
-  rating: {
-    type: DataTypes.FLOAT,
-    allowNull: false,
-    validate: {
-      min: 1,
-      max: 5,
+const Review = sequelize.define(
+  "Review",
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    rating: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      validate: {
+        min: 1,
+        max: 5,
+      },
+    },
+    comment: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
   },
-  comment: {
-    type: DataTypes.TEXT,
-    allowNull: true, 
+  {
+    timestamps: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ["userId", "bookId"],
+      },
+    ],
   },
-}, {
-  timestamps: true, 
-  indexes: [
-    {
-      unique: true,
-      fields: ['userId', 'bookId']
-    }
-  ]
-});
+);
 
 Review.associate = (models) => {
-  Review.belongsTo(models.User, { 
-    foreignKey: 'userId', 
-    as: 'user' 
+  Review.belongsTo(models.User, {
+    foreignKey: "userId",
+    as: "user",
   });
-  
-  Review.belongsTo(models.Book, { 
-    foreignKey: 'bookId', 
-    as: 'book' 
+
+  Review.belongsTo(models.Book, {
+    foreignKey: "bookId",
+    as: "book",
   });
 };
 

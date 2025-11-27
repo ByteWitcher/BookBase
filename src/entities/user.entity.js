@@ -58,29 +58,28 @@ User.associate = (models) => {
     foreignKey: "adminId",
     as: "processedBooks",
   });
-   User.belongsToMany(models.Book, {
-    through: 'Favorites',
-    foreignKey: 'userId',
-    otherKey: 'bookId',
-    as: 'favoriteBooks',
-    timestamps: true
+  User.belongsToMany(models.Book, {
+    through: "Favorites",
+    foreignKey: "userId",
+    otherKey: "bookId",
+    as: "favoriteBooks",
+    timestamps: true,
   });
 
   // Likes
   User.belongsToMany(models.Book, {
-    through: 'Likes',
-    foreignKey: 'userId',
-    otherKey: 'bookId',
-    as: 'likedBooks',
-    timestamps: true
+    through: "Likes",
+    foreignKey: "userId",
+    otherKey: "bookId",
+    as: "likedBooks",
+    timestamps: true,
   });
 
   // Reviews
   User.hasMany(models.Review, {
-    foreignKey: 'userId',
-    as: 'reviews'
+    foreignKey: "userId",
+    as: "reviews",
   });
-
 };
 
 export default User;

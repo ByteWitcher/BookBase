@@ -1,4 +1,4 @@
-import likeService from '../services/like.service.js';
+import likeService from "../services/like.service.js";
 
 class LikeController {
   /**
@@ -10,26 +10,26 @@ class LikeController {
       const { id: bookId } = req.params;
 
       const result = await likeService.toggleLike(userId, bookId);
-      
+
       res.status(200).json({
         success: true,
-        message: result.liked ? 'Book liked' : 'Book unliked',
+        message: result.liked ? "Book liked" : "Book unliked",
         data: {
           bookId: result.bookId,
           liked: result.liked,
-          action: result.liked ? 'LIKED' : 'UNLIKED',
-          totalLikes: result.totalLikes
-        }
+          action: result.liked ? "LIKED" : "UNLIKED",
+          totalLikes: result.totalLikes,
+        },
       });
     } catch (error) {
       let statusCode = 500;
-      if (error.message.includes('not found')) statusCode = 404;
-      else if (error.message.includes('cannot')) statusCode = 403;
-      else if (error.message.includes('not available')) statusCode = 400;
-      
+      if (error.message.includes("not found")) statusCode = 404;
+      else if (error.message.includes("cannot")) statusCode = 403;
+      else if (error.message.includes("not available")) statusCode = 400;
+
       res.status(statusCode).json({
         success: false,
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -42,21 +42,21 @@ class LikeController {
       const { id: bookId } = req.params;
 
       const result = await likeService.getBookLikes(bookId);
-      
+
       res.status(200).json({
         success: true,
         data: {
           users: result.users,
-          total: result.total
-        }
+          total: result.total,
+        },
       });
     } catch (error) {
       let statusCode = 500;
-      if (error.message.includes('not found')) statusCode = 404;
-      
+      if (error.message.includes("not found")) statusCode = 404;
+
       res.status(statusCode).json({
         success: false,
-        error: error.message
+        error: error.message,
       });
     }
   }
