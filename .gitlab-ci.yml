@@ -79,7 +79,7 @@ deploy-npm:
     - npm ci
     - npm publish
 
-    - git push --follow-tags
+    - git push origin HEAD:$CI_COMMIT_REF_NAME --follow-tags
   only:
     - pushes
 
