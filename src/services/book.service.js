@@ -1,0 +1,326 @@
+import bookRepository from "../repositories/book.repository.js";
+import bookTypeService from "./book-type.service.js";
+import bookGenreService from "./book-genre.service.js";
+import bookRequestService from "./book-request.service.js";
+import crypto from "crypto";
+import { Op } from "sequelize";
+import db from "../entities/index.js";
+import HttpError from "../utils/http-error.util.js";
+import s3Utils from "../utils/s3-wrapper.util.js";
+
+const { BookType, BookGenre } = db;
+
+class BookService {
+  async createBook(userId, data) {
+    const { bookGenreIds, pdfFile, ...bookData } = data;
+
+    if (!pdfFile) {
+      throw new HttpError(400, "PDF file is required");
+    }
+
+    const fingerprint = this._buildBookFingerprint(bookData);
+
+    const existingFingerprint =
+      await bookRepository.findByFingerprint(fingerprint);
+    if (existingFingerprint) {
+      if (existingFingerprint.isActive)
+        throw new HttpError(400, "Book already exists");
+      else
+        throw new HttpError(
+          400,
+          "Book already submitted and is pending approval",
+        );
+    }
+
+    const existingBookType = await bookTypeService.getBookTypeById(
+      bookData.bookTypeId,
+    );
+
+    const existingBookGenres =
+      await bookGenreService.findBookGenresByIds(bookGenreIds);
+
+    if (existingBookGenres.length !== bookGenreIds.length)
+      throw new HttpError(404, "One or more book genres are not found");
+
+    const s3PdfUrl = await s3Utils.uploadFileToS3(
+      pdfFile.buffer,
+      fingerprint + ".pdf",
+      pdfFile.mimetype,
+    );
+
+    let book = await bookRepository.create({
+      ...bookData,
+      fingerprint,
+      s3PdfUrl,
+      isActive: bookData.isActive !== undefined ? bookData.isActive : true,
+      userId,
+      adminId: bookData.adminId !== undefined ? bookData.adminId : userId,
+    });
+
+    await book.setBookGenres(bookGenreIds);
+    book = book.toJSON();
+    book.bookType = existingBookType;
+    book.bookGenres = existingBookGenres;
+    return book;
+  }
+
+  async getBookById(id) {
+    const book = await bookRepository.findById(id);
+    if (!book) throw new HttpError(404, "Book not found");
+    return book;
+  }
+
+  async findBookById(id) {
+    return await bookRepository.findById(id);
+  }
+
+  async getBooksFiltered(query) {
+    const {
+      page = 1,
+      pageSize = 10,
+      title,
+      authors,
+      edition,
+      languageCode,
+      bookTypeId,
+      userId,
+      adminId,
+      bookGenreIds,
+      startDate,
+      endDate,
+      minPages,
+      maxPages,
+      minLikes,
+      maxLikes,
+      minRating,
+      maxRating,
+      sortBy = "createdAt",
+      sortOrder = "DESC",
+    } = query;
+
+    const limit = +pageSize;
+    const offset = (page - 1) * limit;
+
+    // WHERE
+
+    const where = {};
+
+    if (title) {
+      where.title = { [Op.iLike]: `%${title}%` };
+    }
+
+    if (authors) {
+      where.authors = {
+        [Op.overlap]: Array.isArray(authors) ? authors : [authors],
+      };
+    }
+
+    if (edition) {
+      where.edition = { [Op.iLike]: `%${edition}%` };
+    }
+
+    if (languageCode) {
+      where.languageCode = languageCode;
+    }
+
+    if (bookTypeId) {
+      where.bookTypeId = bookTypeId;
+    }
+
+    if (userId) {
+      where.userId = userId;
+    }
+
+    if (adminId) {
+      where.adminId = adminId;
+    }
+
+    if (startDate || endDate) {
+      where.releaseDate = {};
+      if (startDate) where.releaseDate[Op.gte] = new Date(startDate);
+      if (endDate) where.releaseDate[Op.lte] = new Date(endDate);
+    }
+
+    if (minPages || maxPages) {
+      where.pageCount = {};
+      if (minPages) where.pageCount[Op.gte] = Number(minPages);
+      if (maxPages) where.pageCount[Op.lte] = Number(maxPages);
+    }
+
+    if (minLikes || maxLikes) {
+      where.likes = {};
+      if (minLikes) where.likes[Op.gte] = Number(minLikes);
+      if (maxLikes) where.likes[Op.lte] = Number(maxLikes);
+    }
+
+    if (minRating || maxRating) {
+      where.rating = {};
+      if (minRating) where.rating[Op.gte] = Number(minRating);
+      if (maxRating) where.rating[Op.lte] = Number(maxRating);
+    }
+
+    // INCLUDE
+
+    const include = [
+      {
+        model: BookGenre,
+        as: "bookGenres",
+        ...(bookGenreIds && {
+          where: {
+            id: {
+              [Op.in]: Array.isArray(bookGenreIds)
+                ? bookGenreIds
+                : [bookGenreIds],
+            },
+          },
+          required: true,
+        }),
+      },
+      {
+        model: BookType,
+        as: "bookType",
+      },
+    ];
+
+    // SORTING
+
+    const validSortFields = [
+      "title",
+      "releaseDate",
+      "pageCount",
+      "likes",
+      "rating",
+      "createdAt",
+    ];
+
+    const order = [
+      [
+        validSortFields.includes(sortBy) ? sortBy : "createdAt",
+        sortOrder.toUpperCase() === "ASC" ? "ASC" : "DESC",
+      ],
+    ];
+
+    // QUERY
+
+    const { count, rows } = await bookRepository.findFiltered({
+      where,
+      include,
+      limit,
+      offset,
+      order,
+    });
+
+    return {
+      totalItems: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: Number(page),
+      pageSize: limit,
+      data: rows,
+    };
+  }
+
+  async countBooksByBookTypeId(bookTypeId) {
+    return await bookRepository.countByBookTypeId(bookTypeId);
+  }
+
+  async countBooksByBookGenreId(bookGenreId) {
+    return await bookRepository.countByBookGenreId(bookGenreId);
+  }
+
+  async updateBook(id, data) {
+    const book = await bookRepository.findById(id);
+    if (!book) throw new HttpError(404, "Book not found");
+    const { bookGenreIds, ...bookData } = data;
+    const allowed = [
+      "title",
+      "authors",
+      "edition",
+      "description",
+      "languageCode",
+      "releaseDate",
+      "pageCount",
+      "s3PdfUrl",
+      "bookTypeId",
+    ];
+    const updates = {};
+
+    allowed.forEach((field) => {
+      if (bookData[field] !== undefined && bookData[field] !== book[field]) {
+        updates[field] = bookData[field];
+      }
+    });
+
+    if (updates.bookTypeId !== undefined) {
+      await bookTypeService.getBookTypeById(updates.bookTypeId);
+    }
+
+    if (bookGenreIds !== undefined) {
+      const existingBookGenres =
+        await bookGenreService.findBookGenresByIds(bookGenreIds);
+
+      if (existingBookGenres.length !== bookGenreIds.length)
+        throw new HttpError(404, "One or more book genres are not found");
+    }
+
+    Object.assign(book, updates);
+    const fingerprint = this._buildBookFingerprint(book);
+    const existingFingerprint =
+      await bookRepository.findByFingerprint(fingerprint);
+    if (existingFingerprint && existingFingerprint.id !== book.id) {
+      throw new HttpError(400, "Book already exists");
+    }
+
+    book.fingerprint = fingerprint;
+
+    await book.save();
+    if (bookGenreIds !== undefined) {
+      await book.setBookGenres(bookGenreIds);
+    }
+    book.bookType = await book.getBookType();
+    book.bookGenres = await book.getBookGenres();
+    return book;
+  }
+
+  async activateBook(userId, id) {
+    const book = await bookRepository.findById(id);
+    book.isActive = true;
+    book.adminId = userId;
+    return await book.save();
+  }
+
+  async deleteBookById(id) {
+    const book = await bookRepository.findById(id);
+    if (!book) throw new HttpError(404, "Book not found");
+    if (book.s3PdfUrl) {
+      await s3Utils.deleteFileFromS3(book.fingerprint + ".pdf");
+    }
+    await book.setBookGenres([]);
+    const bookRequest = await book.getBookRequest();
+    if (bookRequest)
+      await bookRequestService.updateBookRequestWithBookAttributes(
+        bookRequest,
+        {
+          title: book.title,
+          authors: book.authors,
+          edition: book.edition,
+          languageCode: book.languageCode,
+        },
+      );
+    return await bookRepository.deleteById(id);
+  }
+
+  _buildBookFingerprint(book) {
+    let fingerprint = book.title;
+    book.authors.forEach((element) => {
+      fingerprint += element;
+    });
+    fingerprint = fingerprint + book.edition + book.languageCode;
+
+    return crypto
+      .createHash("sha256")
+      .update(fingerprint, "utf8")
+      .digest("hex");
+  }
+}
+
+export default new BookService();

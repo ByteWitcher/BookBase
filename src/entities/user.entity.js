@@ -1,37 +1,63 @@
-import { DataTypes, Model } from 'sequelize';
+import { DataTypes } from "sequelize";
+import sequelize from "../config/database.js";
 
-export default function initUser(sequelize) {
-  class User extends Model {}
+const User = sequelize.define(
+  "User",
+  {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: DataTypes.UUIDV4,
+    },
 
-  User.init(
-    {
-      id: {
-        type: DataTypes.UUID,
-        primaryKey: true,
-        defaultValue: DataTypes.UUIDV4,
-      },
-      username: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
+    username: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      validate: {
+        isEmail: true,
       },
     },
-    {
-      sequelize,
-      modelName: 'User',
-      tableName: 'Users',
-      timestamps: true,
-      createdAt: 'createdAt',
-      updatedAt: false,
-    }
-  );
 
-  User.associate = (models) => {
-    const useFk = process.env.USE_DB_FKS === 'true';
-    User.hasMany(models.ReadingSession, { foreignKey: 'userId', constraints: useFk });
-    User.hasMany(models.ReadingAchievement, { foreignKey: 'userId', constraints: useFk });
-    User.hasMany(models.WeeklyReadingSummary, { foreignKey: 'userId', constraints: useFk });
-  };
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
 
-  return User;
-}
+    role: {
+      type: DataTypes.ENUM("USER", "ADMIN"),
+      defaultValue: "USER",
+    },
+  },
+  {
+    timestamps: true,
+    updatedAt: false,
+  },
+);
+
+User.associate = (models) => {
+  User.hasMany(models.BookRequest, {
+    foreignKey: "userId",
+    as: "bookRequests",
+  });
+  User.hasMany(models.BookRequest, {
+    foreignKey: "adminId",
+    as: "processedBookRequests",
+  });
+  User.hasMany(models.Book, {
+    foreignKey: "userId",
+    as: "books",
+  });
+  User.hasMany(models.Book, {
+    foreignKey: "adminId",
+    as: "processedBooks",
+  });
+};
+
+export default User;

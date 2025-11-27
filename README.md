@@ -2,11 +2,11 @@
 
 In group of four students, you will be in charge of developing a REST/RESTful application of your choice in Node.JS. You are responsible of choosing the kind of APIs you wish to develop, writing the specification, and developing and testing the API through a top-down approach. You will also be in charge of automating your process, from merge request to test, packaging, and deployment on a public repository.
 
-Some ideas of APIs:  code snippet retrieval, cooking recipes, playlist management, etc. Be original.
+Some ideas of APIs: code snippet retrieval, cooking recipes, playlist management, etc. Be original.
 
 The application consists of both a backend written in Node.JS (to implement the different services the application is supposed to provide) and an API to specify/document the services provided by the server. The backend implementation must be fully compliant with the specification.
 
-In addition to functional requirements, your specification must contain non-functional considerations. Examples of such considerations include: how is the API protected (simple password, OAuth 2.0, etc.), how the backend is implemented and evaluated (use of HTTP/2, what are the metrics used to measure the performance of the API and the expected performance to reach, and  etc.).
+In addition to functional requirements, your specification must contain non-functional considerations. Examples of such considerations include: how is the API protected (simple password, OAuth 2.0, etc.), how the backend is implemented and evaluated (use of HTTP/2, what are the metrics used to measure the performance of the API and the expected performance to reach, and etc.).
 
 ## Steps for developing the API
 
@@ -16,7 +16,7 @@ To develop the API, you will have to:
 : Write your software specification in natural language. It should include both functional and non-functional requirements: what your API is supposed to do, who are the actors, what are the concepts manipulated, how is the API protected, etc.
 
 **Formalise the system using OpenAPI and Swagger:**
-: an OpenAPI specification consists in defining all the possible HTTP requests that can be done to interrogate the API, query some information, and/or update it. It should also describe the different concepts manipulated (called *components*).
+: an OpenAPI specification consists in defining all the possible HTTP requests that can be done to interrogate the API, query some information, and/or update it. It should also describe the different concepts manipulated (called _components_).
 
 **Implement the server:**
 : The server must be implemented in Node.JS. Although some tools such as Swagger allows you to generate the skeleton of the server (handling the HTTP requests -- the logic has still to be implemented by hand), we recommend you to implement your server by hand, such that you have full control of your server and the optimisation you will be able to improve the performance of your REST application.
@@ -69,7 +69,7 @@ Different evaluation criteria will be taken into considerations for evaluating y
 The table below details the different artifacts to hand-in. **The final submission deadline is November, 28th, 5pm.**
 
 | Name of the artifact                            | Format             | Hand-in platform                                   |
-|-------------------------------------------------|--------------------|----------------------------------------------------|
+| ----------------------------------------------- | ------------------ | -------------------------------------------------- |
 | Group creation                                  | -                  | [Google form](https://forms.gle/xvyBZwbsXdyM4acN6) |
 | System specification in natural language        | Markdown           | Gitlab                                             |
 | OpenAPI specification                           | YAML specification | Gitlab                                             |
