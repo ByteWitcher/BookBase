@@ -65,9 +65,12 @@ deploy-npm:
   variables:
     NODE_ENV: production
   script:
-    - npm version patch --no-git-tag-version
-    - npm ci
-    - npm publish --tag latest
+    - npm version patch
+    - git config user.email "ci-bot@example.com"
+    - git config user.name "CI Bot"
+    - git add package.json package-lock.json
+    - git commit -m "Bump version to $(node -p "require('./package.json').version")"
+    - git push origin dev
   only:
     - pushes
 
