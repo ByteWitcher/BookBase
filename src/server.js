@@ -12,15 +12,11 @@ import BookTypeController from "./controllers/book-type.controller.js";
 import BookGenreController from "./controllers/book-genre.controller.js";
 import BookController from "./controllers/book.controller.js";
 import BookRequestController from "./controllers/book-request.controller.js";
-import sequelize from "./config/database.js";
-
 import favoriteController from "./controllers/favorite.controller.js";
 import likeController from "./controllers/like.controller.js";
 import reviewController from "./controllers/review.controller.js";
 
-import User from "./entities/user.entity.js";
-import Book from "./entities/book.entity.js";
-import Review from "./entities/review.entity.js";
+
 
 export class Server {
   async listen(port = 3000) {
