@@ -3,6 +3,7 @@ stages:
   - unit tests
   - coverage
   - sonarqube
+  - deploy
 
 format-check:
   stage: formatting
@@ -57,3 +58,20 @@ sonarqube-check:
     - merge_requests
   dependencies:
     - coverage-report
+
+deploy-npm:
+  stage: deploy
+  image: node:18
+  before_script:
+    # Configure npm to use GitLab registry
+    - echo "@ngs:registry=https://im2ag-gitlab.univ-grenoble-alpes.fr/api/v4/projects/466/packages/npm/" > .npmrc
+    - echo "//im2ag-gitlab.univ-grenoble-alpes.fr/api/v4/projects/466/packages/npm/:_authToken=${NPM_TOKEN}" >> .npmrc
+  script:
+    - npm version patch -m "ci: bump version to %s"
+    - npm ci
+    - npm publish
+    - git config user.name "CI Bot"
+    - git config user.email "ci@ensiamg.com"
+    - git push --follow-tags
+  only:
+    - pushes
