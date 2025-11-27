@@ -61,13 +61,48 @@ sonarqube-check:
 
 deploy-npm:
   stage: deploy
-  image: node:18exi
+  image: node:18
   script:
+    - |
+      echo "JWT_SECRET=$JWT_SECRET" > .env
+      echo "DATABASE_URL=$DATABASE_URL" >> .env
+      echo "AWS_ACCESS_KEY=$AWS_ACCESS_KEY" >> .env
+      echo "AWS_SECRET_KEY=$AWS_SECRET_KEY" >> .env
+      echo "AWS_REGION=$AWS_REGION" >> .env
+      echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> .env
+      echo "NPM_TOKEN=$NPM_TOKEN" >> .env
+
     - 'npm version patch -m "ci: bump version to %s"'
     - npm ci
     - npm publish
+
     - git config user.name "CI Bot"
     - git config user.email "ci@ensiamg.com"
     - git push --follow-tags
   only:
     - pushes
+
+deploy-docker:
+  stage: deploy
+  image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
+  variables:
+    DOCKER_DRIVER: overlay2
+  script:
+    - |
+      echo "JWT_SECRET=$JWT_SECRET" > .env
+      echo "DATABASE_URL=$DATABASE_URL" >> .env
+      echo "AWS_ACCESS_KEY=$AWS_ACCESS_KEY" >> .env
+      echo "AWS_SECRET_KEY=$AWS_SECRET_KEY" >> .env
+      echo "AWS_REGION=$AWS_REGION" >> .env
+      echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> .env
+      echo "NPM_TOKEN=$NPM_TOKEN" >> .env
+
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:latest
+    - docker push $CI_REGISTRY_IMAGE:latest
+  only:
+    - main
