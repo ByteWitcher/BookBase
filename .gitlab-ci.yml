@@ -62,36 +62,26 @@ sonarqube-check:
 deploy-npm:
   stage: deploy
   image: node:18
+  variables:
+    NODE_ENV: production
   script:
-    - |
-      echo "JWT_SECRET=$JWT_SECRET" > .env
-      echo "DATABASE_URL=$DATABASE_URL" >> .env
-      echo "AWS_ACCESS_KEY=$AWS_ACCESS_KEY" >> .env
-      echo "AWS_SECRET_KEY=$AWS_SECRET_KEY" >> .env
-      echo "AWS_REGION=$AWS_REGION" >> .env
-      echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> .env
-      echo "NPM_TOKEN=$NPM_TOKEN" >> .env
+    - echo "JWT_SECRET=$JWT_SECRET" > .env
+    - echo "DATABASE_URL=$DATABASE_URL" >> .env
+    - echo "AWS_ACCESS_KEY=$AWS_ACCESS_KEY" >> .env
+    - echo "AWS_SECRET_KEY=$AWS_SECRET_KEY" >> .env
+    - echo "AWS_REGION=$AWS_REGION" >> .env
+    - echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> .env
+    - echo "NPM_TOKEN=$NPM_TOKEN" >> .env
 
-    - git config user.name "CI Bot"
-    - git config user.email "ci@ensiamg.com"
-
-    - |
-      BASE_VERSION=$(node -p "require('./package.json').version")
-      UNIQUE_VERSION="${BASE_VERSION}-${CI_PIPELINE_IID}"
-      echo "Bumping version to $UNIQUE_VERSION"
-      npm version $UNIQUE_VERSION --git-tag-version=false
+    - BASE_VERSION=$(node -p "require('./package.json').version")
+    - UNIQUE_VERSION="${BASE_VERSION}-${CI_PIPELINE_IID}"
+    - echo "Bumping package version to $UNIQUE_VERSION"
+    - npm version $UNIQUE_VERSION --no-git-tag-version
 
     - npm ci
-
     - npm publish
-
-    - |
-      TAG="v${BASE_VERSION}-${CI_PIPELINE_IID}"
-      git tag $TAG
-      git push origin HEAD:$CI_COMMIT_REF_NAME --tags
-
   only:
-    - pushes
+    - main
 
 deploy-docker:
   stage: deploy
