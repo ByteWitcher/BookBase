@@ -71,11 +71,25 @@ deploy-npm:
       echo "AWS_REGION=$AWS_REGION" >> .env
       echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> .env
       echo "NPM_TOKEN=$NPM_TOKEN" >> .env
+
     - git config user.name "CI Bot"
     - git config user.email "ci@ensiamg.com"
+
+    - |
+      BASE_VERSION=$(node -p "require('./package.json').version")
+      UNIQUE_VERSION="${BASE_VERSION}-${CI_PIPELINE_IID}"
+      echo "Bumping version to $UNIQUE_VERSION"
+      npm version $UNIQUE_VERSION --git-tag-version=false
+
     - npm ci
+
     - npm publish
-    - git push origin HEAD:$CI_COMMIT_REF_NAME --follow-tags
+
+    - |
+      TAG="v${BASE_VERSION}-${CI_PIPELINE_IID}"
+      git tag $TAG
+      git push origin HEAD:$CI_COMMIT_REF_NAME --tags
+
   only:
     - pushes
 
