@@ -92,77 +92,90 @@ export class Server {
     );
 
     // BOOK-TYPE ROUTES
-    app.post("/book-types", (req, res) =>
+    app.post("/book-types", authMiddleware, requireAdmin, (req, res) =>
       BookTypeController.createBookType(req, res),
     );
-    app.get("/book-types", (req, res) =>
+    app.get("/book-types", authMiddleware, (req, res) =>
       BookTypeController.getBookTypes(req, res),
     );
-    app.get("/book-types/id/:id", (req, res) =>
+    app.get("/book-types/id/:id", authMiddleware, (req, res) =>
       BookTypeController.getBookTypeById(req, res),
     );
-    app.get("/book-types/code/:code", (req, res) =>
+    app.get("/book-types/code/:code", authMiddleware, (req, res) =>
       BookTypeController.getBookTypeByCode(req, res),
     );
-    app.get("/book-types/name/:name", (req, res) =>
+    app.get("/book-types/name/:name", authMiddleware, (req, res) =>
       BookTypeController.getBookTypeByName(req, res),
     );
-    app.put("/book-types/:id", (req, res) =>
+    app.put("/book-types/:id", authMiddleware, requireAdmin, (req, res) =>
       BookTypeController.updateBookType(req, res),
     );
-    app.delete("/book-types/:id", (req, res) =>
+    app.delete("/book-types/:id", authMiddleware, requireAdmin, (req, res) =>
       BookTypeController.deleteBookTypeById(req, res),
     );
 
     // BOOK-GENRE ROUTES
-    app.post("/book-genres", (req, res) =>
+    app.post("/book-genres", authMiddleware, requireAdmin, (req, res) =>
       BookGenreController.createBookGenre(req, res),
     );
-    app.get("/book-genres", (req, res) =>
+    app.get("/book-genres", authMiddleware, (req, res) =>
       BookGenreController.getBookGenres(req, res),
     );
-    app.get("/book-genres/id/:id", (req, res) =>
+    app.get("/book-genres/id/:id", authMiddleware, (req, res) =>
       BookGenreController.getBookGenreById(req, res),
     );
-    app.get("/book-genres/code/:code", (req, res) =>
+    app.get("/book-genres/code/:code", authMiddleware, (req, res) =>
       BookGenreController.getBookGenreByCode(req, res),
     );
-    app.get("/book-genres/name/:name", (req, res) =>
+    app.get("/book-genres/name/:name", authMiddleware, (req, res) =>
       BookGenreController.getBookGenreByName(req, res),
     );
-    app.put("/book-genres/:id", (req, res) =>
+    app.put("/book-genres/:id", authMiddleware, requireAdmin, (req, res) =>
       BookGenreController.updateBookGenre(req, res),
     );
-    app.delete("/book-genres/:id", (req, res) =>
+    app.delete("/book-genres/:id", authMiddleware, requireAdmin, (req, res) =>
       BookGenreController.deleteBookGenreById(req, res),
     );
 
     // BOOK ROUTES
-    app.post("/books", upload.single("pdfFile"), (req, res) =>
-      BookController.createBook(req, res),
+    app.post(
+      "/books",
+      authMiddleware,
+      requireAdmin,
+      upload.single("pdfFile"),
+      (req, res) => BookController.createBook(req, res),
     );
-    app.get("/books", (req, res) => BookController.getBooksFiltered(req, res));
-    app.get("/books/:id", (req, res) => BookController.getBookById(req, res));
-    app.put("/books/:id", (req, res) => BookController.updateBook(req, res));
-    app.delete("/books/:id", (req, res) =>
+    app.get("/books", authMiddleware, (req, res) =>
+      BookController.getBooksFiltered(req, res),
+    );
+    app.get("/books/:id", authMiddleware, (req, res) =>
+      BookController.getBookById(req, res),
+    );
+    app.put("/books/:id", authMiddleware, requireAdmin, (req, res) =>
+      BookController.updateBook(req, res),
+    );
+    app.delete("/books/:id", authMiddleware, requireAdmin, (req, res) =>
       BookController.deleteBookById(req, res),
     );
 
     // BOOK-REQUEST ROUTES
-    app.post("/book-requests", upload.single("pdfFile"), (req, res) =>
-      BookRequestController.createBookRequest(req, res),
+    app.post(
+      "/book-requests",
+      authMiddleware,
+      upload.single("pdfFile"),
+      (req, res) => BookRequestController.createBookRequest(req, res),
     );
 
-    app.get("/book-requests", (req, res) =>
+    app.get("/book-requests", authMiddleware, (req, res) =>
       BookRequestController.getBookRequestsFiltered(req, res),
     );
-    app.get("/book-requests/:id", (req, res) =>
+    app.get("/book-requests/:id", authMiddleware, (req, res) =>
       BookRequestController.getBookRequestById(req, res),
     );
-    app.put("/book-requests/:id", (req, res) =>
+    app.put("/book-requests/:id", authMiddleware, requireAdmin, (req, res) =>
       BookRequestController.updateBookRequest(req, res),
     );
-    app.delete("/book-requests/:id", (req, res) =>
+    app.delete("/book-requests/:id", authMiddleware, requireAdmin, (req, res) =>
       BookRequestController.deleteBookRequestById(req, res),
     );
 

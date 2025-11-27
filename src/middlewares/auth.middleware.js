@@ -1,4 +1,4 @@
-import JwtUtil from "../utils/jwt.js";
+import JwtUtil from "../utils/jwt.util.js";
 
 export default function authMiddleware(req, res, next) {
   const header = req.headers.authorization;

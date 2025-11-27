@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import userRepository from "../repositories/user.repository.js";
-import JwtUtil from "../utils/jwt.js";
+import JwtUtil from "../utils/jwt.util.js";
 
 class AuthService {
   async register(data) {
