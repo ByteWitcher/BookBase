@@ -50,9 +50,9 @@ integration-tests:
           break
         fi
         echo "Waiting for server..."
-        sleep 2
+        sleep 5
       done
-    - newman run "postman/BookBase API Tests (Pre-existing Admin).postman_collection.json" --env-var "baseUrl=http://localhost:3000" --bail
+    - newman run "postman/collection.json" --env-var "baseUrl=http://localhost:3000" --bail
   after_script:
     - pkill -f "node index.js" || true
   artifacts:
