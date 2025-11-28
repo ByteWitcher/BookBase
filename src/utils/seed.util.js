@@ -4,7 +4,7 @@ import userRepository from "../repositories/user.repository.js";
 class SeedUtil {
   async createDefaultAdmin() {
     const adminEmail = "superadmin@gmail.com";
-    
+
     // Check if admin already exists
     const existingAdmin = await userRepository.findByEmail(adminEmail);
     if (existingAdmin) {
@@ -25,7 +25,7 @@ class SeedUtil {
       });
 
       console.log("✅ Default admin user created successfully:");
-      
+
       return adminUser;
     } catch (error) {
       console.error("❌ Failed to create default admin user:", error.message);
