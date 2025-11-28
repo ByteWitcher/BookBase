@@ -118,8 +118,10 @@ deploy-npm:
     - npm version $UNIQUE_VERSION --no-git-tag-version
     - npm ci
     - npm publish --tag latest
-  only:
-    - pushes
+  rules:
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+      when: on_success
+    - when: never
 
 deploy-docker:
   stage: deploy
@@ -137,5 +139,7 @@ deploy-docker:
     - docker push "$DOCKER_IMAGE:$CI_COMMIT_SHA"
     - docker tag "$DOCKER_IMAGE:$CI_COMMIT_SHA" "$DOCKER_IMAGE:latest"
     - docker push "$DOCKER_IMAGE:latest"
-  only:
-    - pushes
+  rules:
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+      when: on_success
+    - when: never
