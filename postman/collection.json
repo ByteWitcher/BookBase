@@ -668,13 +668,15 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									""
+									"const response = pm.response.json();",
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"// Save the created book's ID for chaining",
+									"pm.collectionVariables.set(\"bookId\", response.id);"
 								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							},
-							"type": "text/javascript"
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
