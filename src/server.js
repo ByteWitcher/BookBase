@@ -48,91 +48,91 @@ export class Server {
     app.post("/auth/register", (req, res) => authController.register(req, res));
     app.post("/auth/login", (req, res) => authController.login(req, res));
     app.post("/auth/reset-password", (req, res) =>
-      authController.resetPassword(req, res)
+      authController.resetPassword(req, res),
     );
 
     // USER CONTROLLER
     app.get("/users/me", authMiddleware, (req, res) =>
-      userController.getMe(req, res)
+      userController.getMe(req, res),
     );
     app.get("/users/id/:id", authMiddleware, requireAdmin, (req, res) =>
-      userController.getUserById(req, res)
+      userController.getUserById(req, res),
     );
     app.get("/users/email/:email", authMiddleware, requireAdmin, (req, res) =>
-      userController.getUserByEmail(req, res)
+      userController.getUserByEmail(req, res),
     );
     app.get(
       "/users/username/:username",
       authMiddleware,
       requireAdmin,
-      (req, res) => userController.getUserByUsername(req, res)
+      (req, res) => userController.getUserByUsername(req, res),
     );
     app.get("/users", authMiddleware, (req, res) =>
-      userController.getUsers(req, res)
+      userController.getUsers(req, res),
     );
     app.put("/users/me/update", authMiddleware, (req, res) =>
-      userController.updateMe(req, res)
+      userController.updateMe(req, res),
     );
     app.put(
       "/users/username/:username/update",
       authMiddleware,
       requireAdmin,
-      (req, res) => userController.updateUser(req, res)
+      (req, res) => userController.updateUser(req, res),
     );
     app.delete("/users/me/delete", authMiddleware, (req, res) =>
-      userController.deleteMe(req, res)
+      userController.deleteMe(req, res),
     );
     app.delete(
       "/users/username/:username/delete",
       authMiddleware,
       requireAdmin,
-      (req, res) => userController.deleteUser(req, res)
+      (req, res) => userController.deleteUser(req, res),
     );
 
     // BOOK-TYPE ROUTES
     app.post("/book-types", authMiddleware, requireAdmin, (req, res) =>
-      BookTypeController.createBookType(req, res)
+      BookTypeController.createBookType(req, res),
     );
     app.get("/book-types", authMiddleware, (req, res) =>
-      BookTypeController.getBookTypes(req, res)
+      BookTypeController.getBookTypes(req, res),
     );
     app.get("/book-types/id/:id", authMiddleware, (req, res) =>
-      BookTypeController.getBookTypeById(req, res)
+      BookTypeController.getBookTypeById(req, res),
     );
     app.get("/book-types/code/:code", authMiddleware, (req, res) =>
-      BookTypeController.getBookTypeByCode(req, res)
+      BookTypeController.getBookTypeByCode(req, res),
     );
     app.get("/book-types/name/:name", authMiddleware, (req, res) =>
-      BookTypeController.getBookTypeByName(req, res)
+      BookTypeController.getBookTypeByName(req, res),
     );
     app.put("/book-types/:id", authMiddleware, requireAdmin, (req, res) =>
-      BookTypeController.updateBookType(req, res)
+      BookTypeController.updateBookType(req, res),
     );
     app.delete("/book-types/:id", authMiddleware, requireAdmin, (req, res) =>
-      BookTypeController.deleteBookTypeById(req, res)
+      BookTypeController.deleteBookTypeById(req, res),
     );
 
     // BOOK-GENRE ROUTES
     app.post("/book-genres", authMiddleware, requireAdmin, (req, res) =>
-      BookGenreController.createBookGenre(req, res)
+      BookGenreController.createBookGenre(req, res),
     );
     app.get("/book-genres", authMiddleware, (req, res) =>
-      BookGenreController.getBookGenres(req, res)
+      BookGenreController.getBookGenres(req, res),
     );
     app.get("/book-genres/id/:id", authMiddleware, (req, res) =>
-      BookGenreController.getBookGenreById(req, res)
+      BookGenreController.getBookGenreById(req, res),
     );
     app.get("/book-genres/code/:code", authMiddleware, (req, res) =>
-      BookGenreController.getBookGenreByCode(req, res)
+      BookGenreController.getBookGenreByCode(req, res),
     );
     app.get("/book-genres/name/:name", authMiddleware, (req, res) =>
-      BookGenreController.getBookGenreByName(req, res)
+      BookGenreController.getBookGenreByName(req, res),
     );
     app.put("/book-genres/:id", authMiddleware, requireAdmin, (req, res) =>
-      BookGenreController.updateBookGenre(req, res)
+      BookGenreController.updateBookGenre(req, res),
     );
     app.delete("/book-genres/:id", authMiddleware, requireAdmin, (req, res) =>
-      BookGenreController.deleteBookGenreById(req, res)
+      BookGenreController.deleteBookGenreById(req, res),
     );
 
     // BOOK ROUTES
@@ -141,19 +141,19 @@ export class Server {
       authMiddleware,
       requireAdmin,
       upload.single("pdfFile"),
-      (req, res) => BookController.createBook(req, res)
+      (req, res) => BookController.createBook(req, res),
     );
     app.get("/books", authMiddleware, (req, res) =>
-      BookController.getBooksFiltered(req, res)
+      BookController.getBooksFiltered(req, res),
     );
     app.get("/books/:id", authMiddleware, (req, res) =>
-      BookController.getBookById(req, res)
+      BookController.getBookById(req, res),
     );
     app.put("/books/:id", authMiddleware, requireAdmin, (req, res) =>
-      BookController.updateBook(req, res)
+      BookController.updateBook(req, res),
     );
     app.delete("/books/:id", authMiddleware, requireAdmin, (req, res) =>
-      BookController.deleteBookById(req, res)
+      BookController.deleteBookById(req, res),
     );
 
     // BOOK-REQUEST ROUTES
@@ -161,87 +161,87 @@ export class Server {
       "/book-requests",
       authMiddleware,
       upload.single("pdfFile"),
-      (req, res) => BookRequestController.createBookRequest(req, res)
+      (req, res) => BookRequestController.createBookRequest(req, res),
     );
 
     app.get("/book-requests", authMiddleware, (req, res) =>
-      BookRequestController.getBookRequestsFiltered(req, res)
+      BookRequestController.getBookRequestsFiltered(req, res),
     );
     app.get("/book-requests/:id", authMiddleware, (req, res) =>
-      BookRequestController.getBookRequestById(req, res)
+      BookRequestController.getBookRequestById(req, res),
     );
     app.put("/book-requests/:id", authMiddleware, requireAdmin, (req, res) =>
-      BookRequestController.updateBookRequest(req, res)
+      BookRequestController.updateBookRequest(req, res),
     );
     app.delete("/book-requests/:id", authMiddleware, requireAdmin, (req, res) =>
-      BookRequestController.deleteBookRequestById(req, res)
+      BookRequestController.deleteBookRequestById(req, res),
     );
 
     // READING SESSION ROUTES
     // Leaderboard (public)
     app.get("/reading-sessions/leaderboard", (req, res) =>
-      ReadingSessionController.getLeaderboard(req, res)
+      ReadingSessionController.getLeaderboard(req, res),
     );
 
     app.post("/reading-sessions", authMiddleware, (req, res) =>
-      ReadingSessionController.createSession(req, res)
+      ReadingSessionController.createSession(req, res),
     );
     app.get("/reading-sessions/:id", authMiddleware, (req, res) =>
-      ReadingSessionController.getSessionById(req, res)
+      ReadingSessionController.getSessionById(req, res),
     );
     app.put("/reading-sessions/:id", authMiddleware, (req, res) =>
-      ReadingSessionController.updateSession(req, res)
+      ReadingSessionController.updateSession(req, res),
     );
     app.delete("/reading-sessions/:id", authMiddleware, (req, res) =>
-      ReadingSessionController.deleteSession(req, res)
+      ReadingSessionController.deleteSession(req, res),
     );
 
     app.get(
       "/reading-sessions/user/:userId",
       authMiddleware,
       requireAdmin,
-      (req, res) => ReadingSessionController.getAllSessionsByUser(req, res)
+      (req, res) => ReadingSessionController.getAllSessionsByUser(req, res),
     );
     app.get(
       "/reading-sessions/user/:userId/book/:bookId/latest",
       authMiddleware,
       requireAdmin,
       (req, res) =>
-        ReadingSessionController.getLatestSessionByUserAndBook(req, res)
+        ReadingSessionController.getLatestSessionByUserAndBook(req, res),
     );
     app.get(
       "/reading-sessions/user/:userId/progress",
       authMiddleware,
       requireAdmin,
-      (req, res) => ReadingSessionController.getUserBookProgress(req, res)
+      (req, res) => ReadingSessionController.getUserBookProgress(req, res),
     );
 
     // Convenience endpoints for authenticated user
     app.get("/reading-sessions/me", authMiddleware, (req, res) =>
-      ReadingSessionController.getMySessions(req, res)
+      ReadingSessionController.getMySessions(req, res),
     );
     app.get("/reading-sessions/me/progress", authMiddleware, (req, res) =>
-      ReadingSessionController.getMyBookProgress(req, res)
+      ReadingSessionController.getMyBookProgress(req, res),
     );
 
     // READING ACHIEVEMENT ROUTES
     app.get("/reading-achievements", authMiddleware, requireAdmin, (req, res) =>
-      ReadingAchievementController.getAchievements(req, res)
+      ReadingAchievementController.getAchievements(req, res),
     );
     app.get(
       "/reading-achievements/:id",
       authMiddleware,
       requireAdmin,
-      (req, res) => ReadingAchievementController.getAchievementById(req, res)
+      (req, res) => ReadingAchievementController.getAchievementById(req, res),
     );
     app.delete(
       "/reading-achievements/:id",
       authMiddleware,
       requireAdmin,
-      (req, res) => ReadingAchievementController.deleteAchievement(req, res)
+      (req, res) => ReadingAchievementController.deleteAchievement(req, res),
     );
     app.get("/reading-achievements/me", authMiddleware, (req, res) =>
-      ReadingAchievementController.getMyAchievements(req, res)
+      ReadingAchievementController.getMyAchievements(req, res),
     );
 
     // WEEKLY READING SUMMARY ROUTES
@@ -253,24 +253,24 @@ export class Server {
       (req, res) =>
         WeeklyReadingSummaryController.generateCurrentWeekSummariesForAllUsers(
           req,
-          res
-        )
+          res,
+        ),
     );
 
     // Authenticated user: Get/generate current week's summary
     app.get("/weekly-summaries/me/current-week", authMiddleware, (req, res) =>
-      WeeklyReadingSummaryController.getMyCurrentWeekSummary(req, res)
+      WeeklyReadingSummaryController.getMyCurrentWeekSummary(req, res),
     );
 
     app.get("/weekly-summaries/me", authMiddleware, (req, res) =>
-      WeeklyReadingSummaryController.getMyWeeklySummaries(req, res)
+      WeeklyReadingSummaryController.getMyWeeklySummaries(req, res),
     );
     app.post(
       "/weekly-summaries/user/current-week",
       authMiddleware,
       requireAdmin,
       (req, res) =>
-        WeeklyReadingSummaryController.getUserCurrentWeekSummary(req, res)
+        WeeklyReadingSummaryController.getUserCurrentWeekSummary(req, res),
     );
 
     app.post(
@@ -278,54 +278,54 @@ export class Server {
       authMiddleware,
       requireAdmin,
       (req, res) =>
-        WeeklyReadingSummaryController.getUserWeeklySummaries(req, res)
+        WeeklyReadingSummaryController.getUserWeeklySummaries(req, res),
     );
 
     // Admin: Get all weekly summaries (with filtering, sorting, pagination)
     app.get("/weekly-summaries", authMiddleware, requireAdmin, (req, res) =>
-      WeeklyReadingSummaryController.getAllSummaries(req, res)
+      WeeklyReadingSummaryController.getAllSummaries(req, res),
     );
     app.delete(
       "/weekly-summaries/:id",
       authMiddleware,
       requireAdmin,
-      (req, res) => WeeklyReadingSummaryController.deleteSummary(req, res)
+      (req, res) => WeeklyReadingSummaryController.deleteSummary(req, res),
     );
 
     // FAVORITE ROUTES
     app.post("/books/:id/favorite", authMiddleware, (req, res) =>
-      favoriteController.addToFavorites(req, res)
+      favoriteController.addToFavorites(req, res),
     );
     app.delete("/books/:id/favorite", authMiddleware, (req, res) =>
-      favoriteController.removeFromFavorites(req, res)
+      favoriteController.removeFromFavorites(req, res),
     );
     app.get("/favorites/me", authMiddleware, (req, res) =>
-      favoriteController.getMyFavorites(req, res)
+      favoriteController.getMyFavorites(req, res),
     );
 
     // LIKE ROUTES
     app.post("/books/:id/like", authMiddleware, (req, res) =>
-      likeController.likeBook(req, res)
+      likeController.likeBook(req, res),
     );
     app.get("/books/:id/likes", authMiddleware, (req, res) =>
-      likeController.getBookLikes(req, res)
+      likeController.getBookLikes(req, res),
     );
 
     // REVIEW ROUTES
     app.get("/books/:id/reviews", authMiddleware, (req, res) =>
-      reviewController.getBookReviews(req, res)
+      reviewController.getBookReviews(req, res),
     );
     app.post("/books/:id/reviews", authMiddleware, (req, res) =>
-      reviewController.createReview(req, res)
+      reviewController.createReview(req, res),
     );
     app.put("/reviews/:reviewId", authMiddleware, (req, res) =>
-      reviewController.updateReview(req, res)
+      reviewController.updateReview(req, res),
     );
     app.delete("/reviews/:reviewId", authMiddleware, (req, res) =>
-      reviewController.deleteReview(req, res)
+      reviewController.deleteReview(req, res),
     );
     app.get("/reviews/me", authMiddleware, (req, res) =>
-      reviewController.getMyReviews(req, res)
+      reviewController.getMyReviews(req, res),
     );
 
     // START SERVER
