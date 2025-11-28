@@ -1,6 +1,9 @@
 {
-  "name": "project",
-  "version": "1.0.0",
+  "name": "@ngs/team_05-template",
+  "version": "1.0.14",
+  "publishConfig": {
+    "@ngs:registry": "https://im2ag-gitlab.univ-grenoble-alpes.fr/api/v4/projects/466/packages/npm/"
+  },
   "description": "NGS project",
   "repository": {
     "type": "git",
@@ -12,18 +15,31 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "mocha"
+    "test": "mocha --recursive",
+    "coverage": "c8 --reporter=lcov --reporter=text --exclude=src/repositories/** --exclude=src/middlewares/** --exclude=src/controllers/** --exclude=src/utils/** --exclude=src/server.js --exclude=src/services/book.service.js mocha --recursive"
   },
   "dependencies": {
+    "aws-sdk": "^2.1692.0",
     "bcryptjs": "^3.0.3",
+    "chai": "^6.2.1",
+    "chai-as-promised": "^8.0.0",
+    "diff": "^8.0.2",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
     "pg": "^8.16.3",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.37.7"
+    "sequelize": "^6.37.7",
+    "sinon": "^21.0.0",
+    "sinon-chai": "^4.0.0"
   },
   "devDependencies": {
-    "mocha": "^11.7.4"
+    "c8": "^10.1.3",
+    "chai": "^6.2.1",
+    "mocha": "^11.7.5",
+    "prettier": "^3.6.2",
+    "sinon": "^21.0.0",
+    "supertest": "^7.1.4"
   }
 }
