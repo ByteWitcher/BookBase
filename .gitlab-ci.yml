@@ -70,7 +70,8 @@ deploy-npm:
     - echo "Bumping package version to $UNIQUE_VERSION"
     - npm version $UNIQUE_VERSION --no-git-tag-version
     - npm ci
-    - npm publish --tag latest
+    - npm publish
+    - npm dist-tag add @ngs/team_05-template@$UNIQUE_VERSION latest
   only:
     - pushes
 
