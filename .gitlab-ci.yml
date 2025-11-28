@@ -72,7 +72,9 @@ deploy-npm:
     - npm version patch
     - npm ci
     - npm publish --tag latest
+    - git remote set-url origin https://gitlab-ci-token:${CI_PUSH_TOKEN}@im2ag-gitlab.univ-grenoble-alpes.fr/ngs/team_05/template.git
     - git push origin dev --tags
+
   only:
     - dev
 
