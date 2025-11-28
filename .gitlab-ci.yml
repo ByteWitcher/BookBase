@@ -1,6 +1,7 @@
 stages:
   - formatting
   - unit tests
+  - integration tests
   - coverage
   - sonarqube
 
@@ -23,6 +24,26 @@ unit-tests:
     - npm test
   only:
     - merge_requests
+
+
+integration-tests:
+  stage: integration tests
+  image: postman/newman:alpine
+  script:
+    - echo "Running Postman integration tests with Newman..."
+    - newman run postman/collection.json --env-var "baseUrl=http://localhost:3000" --insecure --timeout-request 60000 --bail --verbose --folder "05. Books" --folder "06. Book Requests" --folder "08. Reading Sessions & Progress" --folder "09. Weekly Summaries & Achievements"
+  artifacts:
+    when: always
+    paths:
+      - newman/
+  only:
+    - merge_requests
+  dependencies:
+    - unit-tests
+  before_script:
+    - apk add --no-cache curl
+    # Ensure Book.pdf is present in the correct path for file upload
+    - cp postman/Book.pdf Book.pdf
 
 coverage-report:
   stage: coverage
@@ -55,5 +76,5 @@ sonarqube-check:
   allow_failure: true
   only:
     - merge_requests
-  dependencies:
+  dependencies: 
     - coverage-report
