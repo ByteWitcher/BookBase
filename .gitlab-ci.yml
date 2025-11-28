@@ -34,10 +34,10 @@ integration-tests:
     - postgres:13
   variables:
     # Override the cloud DB URL with local PostgreSQL service for CI
-    DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/testdb"
-    POSTGRES_DB: testdb
-    POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: postgres
+    INTEGRATION_DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/testdb"
+    # POSTGRES_DB: testdb
+    # POSTGRES_USER: postgres
+    # POSTGRES_PASSWORD: postgres
     NODE_ENV: test
   script:
     - npm ci
