@@ -30,8 +30,6 @@ unit-tests:
 integration-tests:
   stage: integration tests
   image: node:18
-  services:
-    - postgres:13
   variables:
     NODE_ENV: test
   script:
