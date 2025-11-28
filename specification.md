@@ -66,6 +66,11 @@ The platform is organized around several central concepts that define how users 
 - Weekly statistics: total reading time, pages read, reading speed (pages/hour).
 - Progress tracking supports gamification (streaks and achievements).
 
+**Additional Features:**
+• Users can log, view, and filter their reading sessions, track progress per book, and see a public leaderboard.
+• Achievements are awarded for reading milestones.
+• Admins can manage sessions and progress for any user.
+
 # 3. Functional Requirements
 
 ## Authentication
@@ -88,6 +93,13 @@ Users can:
 - Like or unlike books
 - View their list of favorite books
 - Track their reading progress and activity
+
+## User Profile Management
+
+- Users can view and update their own profile information (username, email, etc.).
+- Users can delete their own account (profile and all associated data).
+- Administrators can view, update, or delete any user profile.
+- All profile management actions are protected by authentication and role-based access control.
 
 ## Reviews and Ratings
 
