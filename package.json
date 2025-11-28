@@ -1,6 +1,6 @@
 {
   "name": "@ngs/team_05-template",
-  "version": "1.0.10",
+  "version": "1.0.14",
   "publishConfig": {
     "@ngs:registry": "https://im2ag-gitlab.univ-grenoble-alpes.fr/api/v4/projects/466/packages/npm/"
   },

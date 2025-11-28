@@ -86,18 +86,14 @@ deploy-npm:
   variables:
     NODE_ENV: production
   script:
-    - git config user.email "ci-bot@ensimag.org"
-    - git config user.name "CI Bot"
-    - git checkout -B dev
-
-    - npm version patch
+    - BASE_VERSION=$(node -p "require('./package.json').version")
+    - UNIQUE_VERSION="${BASE_VERSION}-${CI_PIPELINE_IID}"
+    - echo "Bumping package version to $UNIQUE_VERSION"
+    - npm version $UNIQUE_VERSION --no-git-tag-version
     - npm ci
     - npm publish --tag latest
-    - git remote set-url origin https://gitlab-ci-token:${CI_PUSH_TOKEN}@im2ag-gitlab.univ-grenoble-alpes.fr/ngs/team_05/template.git
-    - git push origin dev --tags
-
   only:
-    - dev
+    - pushes
 
 deploy-docker:
   stage: deploy
