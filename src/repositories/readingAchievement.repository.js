@@ -1,4 +1,4 @@
-import models from '../entities/index.js';
+import models from "../entities/index.js";
 
 const { ReadingAchievement } = models;
 
@@ -29,8 +29,6 @@ class ReadingAchievementRepository {
     await achievement.destroy();
     return true;
   }
-
-
 }
 
 export default new ReadingAchievementRepository();

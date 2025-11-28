@@ -1,6 +1,7 @@
 stages:
   - formatting
   - unit tests
+  - integration tests
   - coverage
   - sonarqube
   - deploy
@@ -24,6 +25,52 @@ unit-tests:
     - npm test
   only:
     - merge_requests
+
+
+integration-tests:
+  stage: integration tests
+  image: node:18
+  services:
+    - postgres:13
+  variables:
+    # Override the cloud DB URL with local PostgreSQL service for CI
+    INTEGRATION_DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/testdb"
+    POSTGRES_DB: testdb
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    NODE_ENV: test
+  script:
+    - npm ci
+    - apt-get update && apt-get install -y postgresql-client
+    # Test Docker Postgres connectivity
+    - echo "Testing Postgres connection with psql..."
+    - psql "$INTEGRATION_DATABASE_URL" -c '\l'
+    - npm install -g newman
+    - npm start &
+    - |
+      for i in {1..30}; do
+        if curl -s http://localhost:3000/ > /dev/null; then
+          echo "Server is up!"
+          break
+        fi
+        echo "Waiting for server..."
+        sleep 5
+      done
+    - mkdir -p newman
+    - newman run "postman/collection.json" --env-var "baseUrl=http://localhost:3000" --bail --reporters cli,json,html --reporter-json-export newman/report.json --reporter-html-export newman/report.html
+  after_script:
+    - pkill -f "node index.js" || true
+  artifacts:
+    when: always
+    paths:
+      - newman/
+  only:
+    - merge_requests
+  dependencies:
+    - unit-tests
+  before_script:
+    # Ensure Book.pdf is present in the correct path for file upload
+    - cp "postman/Book.pdf" Book.pdf
 
 coverage-report:
   stage: coverage
@@ -56,7 +103,7 @@ sonarqube-check:
   allow_failure: true
   only:
     - merge_requests
-  dependencies:
+  dependencies: 
     - coverage-report
 
 deploy-npm:
@@ -72,8 +119,10 @@ deploy-npm:
     - npm ci
     - npm publish
     - npm dist-tag add @ngs/team_05-template@$UNIQUE_VERSION latest
-  only:
-    - pushes
+  rules:
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+      when: on_success
+    - when: never
 
 deploy-docker:
   stage: deploy
@@ -91,5 +140,7 @@ deploy-docker:
     - docker push "$DOCKER_IMAGE:$CI_COMMIT_SHA"
     - docker tag "$DOCKER_IMAGE:$CI_COMMIT_SHA" "$DOCKER_IMAGE:latest"
     - docker push "$DOCKER_IMAGE:latest"
-  only:
-    - pushes
+  rules:
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+      when: on_success
+    - when: never

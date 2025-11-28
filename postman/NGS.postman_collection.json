@@ -1,0 +1,764 @@
+{
+	"info": {
+		"_postman_id": "58bfb5ca-d406-44b2-b251-0b5be36a9f24",
+		"name": "NGS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19996173"
+	},
+	"item": [
+		{
+			"name": "Book Type",
+			"item": [
+				{
+					"name": "Create a Book Type",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"code\": \"XXX\",\r\n  \"name\": \"xxx\",\r\n  \"description\": \"eqcqec books\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/book-types",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"book-types"
+							]
+						},
+						"description": "Generated from cURL: curl -X POST http://localhost:3000/book-types \\\r\n-H \"Content-Type: application/json\" \\\r\n-d '{\r\n  \"code\": \"NOVEL\",\r\n  \"name\": \"Novel\",\r\n  \"description\": \"Fictional books\"\r\n}'\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Book Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/book-types",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"book-types"
+							]
+						},
+						"description": "Generated from cURL: curl -X GET http://localhost:3000/book-types\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Book Type by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/book-types/id/67653844-e412-41dd-b2e7-19dad67cf212",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"book-types",
+								"id",
+								"67653844-e412-41dd-b2e7-19dad67cf212"
+							]
+						},
+						"description": "Generated from cURL: curl -X GET http://localhost:3000/book-types/id/<BOOK_TYPE_ID>\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Book Type by Code",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/book-types/code/NOVEL",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"book-types",
+								"code",
+								"NOVEL"
+							]
+						},
+						"description": "Generated from cURL: curl -X GET http://localhost:3000/book-types/code/NOVEL\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Book Type by Name",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/book-types/name/Novel",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"book-types",
+								"name",
+								"Novel"
+							]
+						},
+						"description": "Generated from cURL: curl -X GET http://localhost:3000/book-types/name/Novel\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Update a Book Type",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"autobio\",\r\n    \"description\": \"Updated description for Novel\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/book-types/0248bfde-01f3-40b7-b6c7-0fb7a2f308c3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"book-types",
+								"0248bfde-01f3-40b7-b6c7-0fb7a2f308c3"
+							]
+						},
+						"description": "Generated from cURL: curl -X PUT http://localhost:3000/book-types/<BOOK_TYPE_ID> \\\r\n-H \"Content-Type: application/json\" \\\r\n-d '{\r\n  \"description\": \"Updated description for Novel\"\r\n}'\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a Book Type",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/book-types/d52b9298-4197-499a-bd05-e3610307581f",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"book-types",
+								"d52b9298-4197-499a-bd05-e3610307581f"
+							]
+						},
+						"description": "Generated from cURL: curl -X DELETE http://localhost:3000/book-types/<BOOK_TYPE_ID>\r\n"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Book Genre",
+			"item": [
+				{
+					"name": "Create a Book Genre",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"code\": \"MYSTERY\",\r\n  \"name\": \"Mystery\",\r\n  \"description\": \"Books that contain mystery elements\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/book-genres",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"book-genres"
+							]
+						},
+						"description": "Generated from cURL: curl -X POST http://localhost:3000/book-genres \\\r\n-H \"Content-Type: application/json\" \\\r\n-d '{\r\n  \"code\": \"FANTASY\",\r\n  \"name\": \"Fantasy\",\r\n  \"description\": \"Books that contain magical or fantastical elements\"\r\n}'\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Book Genres",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/book-genres",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"book-genres"
+							]
+						},
+						"description": "Generated from cURL: curl -X GET http://localhost:3000/book-genres\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Book Genre by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/book-genres/id/8703509d-f7d4-4f70-8eb2-1134546b5bb5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"book-genres",
+								"id",
+								"8703509d-f7d4-4f70-8eb2-1134546b5bb5"
+							]
+						},
+						"description": "Generated from cURL: curl -X GET http://localhost:3000/book-genres/id/<BOOK_GENRE_ID>\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Book Genre by Code",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/book-genres/code/FANTASY",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"book-genres",
+								"code",
+								"FANTASY"
+							]
+						},
+						"description": "Generated from cURL: curl -X GET http://localhost:3000/book-genres/code/FANTASY\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Book Genre by Name",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/book-genres/name/Fantasy",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"book-genres",
+								"name",
+								"Fantasy"
+							]
+						},
+						"description": "Generated from cURL: curl -X GET http://localhost:3000/book-genres/name/Fantasy\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Book Genre",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\" :\"Mystery\",  \r\n  \"description\": \"Mystery description look for it yourself\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/book-genres/3ba04dd7-ec53-43ae-a672-52258eb5b792",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"book-genres",
+								"3ba04dd7-ec53-43ae-a672-52258eb5b792"
+							]
+						},
+						"description": "Generated from cURL: curl -X PUT http://localhost:3000/book-genres/<BOOK_GENRE_ID> \\\r\n-H \"Content-Type: application/json\" \\\r\n-d '{\r\n  \"description\": \"Updated description for Fantasy genre\"\r\n}'\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Book Genre",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/book-genres/3ba04dd7-ec53-43ae-a672-52258eb5b792",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"book-genres",
+								"3ba04dd7-ec53-43ae-a672-52258eb5b792"
+							]
+						},
+						"description": "Generated from cURL: curl -X DELETE http://localhost:3000/book-genres/<BOOK_GENRE_ID>\r\n"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Book",
+			"item": [
+				{
+					"name": "Create a Book",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "pdfFile",
+									"type": "file",
+									"src": "/C:/Users/soufi/Downloads/Conception.pdf"
+								},
+								{
+									"key": "title",
+									"value": "XXXXXXXXXXXXXXXXXXXXXXX",
+									"type": "text"
+								},
+								{
+									"key": "authors[]",
+									"value": "Soufiane",
+									"type": "text"
+								},
+								{
+									"key": "authors[]",
+									"value": "Samy",
+									"type": "text"
+								},
+								{
+									"key": "edition",
+									"value": "1st",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "A thrilling fantasy novel",
+									"type": "text"
+								},
+								{
+									"key": "languageCode",
+									"value": "en",
+									"type": "text"
+								},
+								{
+									"key": "releaseDate",
+									"value": "2025-11-26",
+									"type": "text"
+								},
+								{
+									"key": "pageCount",
+									"value": "320",
+									"type": "text"
+								},
+								{
+									"key": "bookTypeId",
+									"value": "67653844-e412-41dd-b2e7-19dad67cf212",
+									"type": "text"
+								},
+								{
+									"key": "bookGenreIds[]",
+									"value": "2e5d82a3-f075-4574-a786-4f5912e2a032",
+									"type": "text"
+								},
+								{
+									"key": "bookGenreIds[]",
+									"value": "8703509d-f7d4-4f70-8eb2-1134546b5bb5",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:3000/books",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"books"
+							]
+						},
+						"description": "Generated from cURL: curl -X POST http://localhost:3000/books \\\r\n-H \"Content-Type: multipart/form-data\" \\\r\n-F \"pdfFile=@/path/to/book.pdf\" \\\r\n-F 'title=The Great Adventure' \\\r\n-F 'authors[]=Author One' \\\r\n-F 'authors[]=Author Two' \\\r\n-F 'edition=1st' \\\r\n-F 'description=A thrilling fantasy novel' \\\r\n-F 'languageCode=en' \\\r\n-F 'releaseDate=2025-11-26' \\\r\n-F 'pageCount=320' \\\r\n-F 'bookTypeId=<BOOK_TYPE_ID>' \\\r\n-F 'bookGenreIds[]=<BOOK_GENRE_ID_1>' \\\r\n-F 'bookGenreIds[]=<BOOK_GENRE_ID_2>'\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Books (Filtered)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/books?page=1&pageSize=50&languageCode=en",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"books"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "50"
+								},
+								{
+									"key": "languageCode",
+									"value": "en"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -X GET \"http://localhost:3000/books?page=1&pageSize=10&title=Adventure\"\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Book by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/books/07dd6031-ed8a-4ccb-826d-ed657f8c8a23",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"books",
+								"07dd6031-ed8a-4ccb-826d-ed657f8c8a23"
+							]
+						},
+						"description": "Generated from cURL: curl -X GET http://localhost:3000/books/<BOOK_ID>\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Update a Book",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"The witcher 3\",\r\n  \"description\": \"One of the best books\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/books/07dd6031-ed8a-4ccb-826d-ed657f8c8a23",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"books",
+								"07dd6031-ed8a-4ccb-826d-ed657f8c8a23"
+							]
+						},
+						"description": "Generated from cURL: curl -X PUT http://localhost:3000/books/<BOOK_ID> \\\r\n-H \"Content-Type: application/json\" \\\r\n-d '{\r\n  \"title\": \"The Greatest Adventure\",\r\n  \"description\": \"Updated description\"\r\n}'\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a Book",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/books/a1487029-5dfa-4e2c-b8f5-bc947bcc5b1d",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"books",
+								"a1487029-5dfa-4e2c-b8f5-bc947bcc5b1d"
+							]
+						},
+						"description": "Generated from cURL: curl -X DELETE http://localhost:3000/books/<BOOK_ID>\r\n"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Book Request",
+			"item": [
+				{
+					"name": "Create a Book Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "pdfFile",
+									"type": "file",
+									"src": "/C:/Users/soufi/Downloads/commentaire.pdf"
+								},
+								{
+									"key": "title",
+									"value": "AAAAA",
+									"type": "text"
+								},
+								{
+									"key": "authors[]",
+									"value": "Author One",
+									"type": "text"
+								},
+								{
+									"key": "edition",
+									"value": "1st",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "A mysterious adventure novel",
+									"type": "text"
+								},
+								{
+									"key": "languageCode",
+									"value": "en",
+									"type": "text"
+								},
+								{
+									"key": "releaseDate",
+									"value": "2025-11-26",
+									"type": "text"
+								},
+								{
+									"key": "pageCount",
+									"value": "280",
+									"type": "text"
+								},
+								{
+									"key": "bookTypeId",
+									"value": "0248bfde-01f3-40b7-b6c7-0fb7a2f308c3",
+									"type": "text"
+								},
+								{
+									"key": "bookGenreIds[]",
+									"value": "8703509d-f7d4-4f70-8eb2-1134546b5bb5",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:3000/book-requests",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"book-requests"
+							]
+						},
+						"description": "Generated from cURL: curl -X POST http://localhost:3000/book-requests \\\r\n-H \"Content-Type: multipart/form-data\" \\\r\n-F \"pdfFile=@/path/to/book.pdf\" \\\r\n-F 'title=The Secret Chronicles' \\\r\n-F 'authors[]=Author One' \\\r\n-F 'edition=1st' \\\r\n-F 'description=A mysterious adventure novel' \\\r\n-F 'languageCode=en' \\\r\n-F 'releaseDate=2025-11-26' \\\r\n-F 'pageCount=280' \\\r\n-F 'bookTypeId=<BOOK_TYPE_ID>' \\\r\n-F 'bookGenreIds[]=<BOOK_GENRE_ID_1>' \\\r\n-F 'bookGenreIds[]=<BOOK_GENRE_ID_2>'\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Book Requests (Filtered)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/book-requests?page=1&pageSize=10&status=PENDING",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"book-requests"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								},
+								{
+									"key": "status",
+									"value": "PENDING"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -X GET \"http://localhost:3000/book-requests?page=1&pageSize=10&status=PENDING\"\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Book Request by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/book-requests/87fdceb2-fb33-4a84-a3ac-1512eb3d9eb5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"book-requests",
+								"87fdceb2-fb33-4a84-a3ac-1512eb3d9eb5"
+							]
+						},
+						"description": "Generated from cURL: curl -X GET http://localhost:3000/book-requests/<BOOK_REQUEST_ID>\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Book Request",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"status\":\"REJECTED\",\"comment\":\"Meeeh\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/book-requests/6d76a84c-64e3-4f63-821e-ce28c843a39c",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"book-requests",
+								"6d76a84c-64e3-4f63-821e-ce28c843a39c"
+							]
+						},
+						"description": "Generated from cURL: curl -X PUT http://localhost:3000/book-requests/<BOOK_REQUEST_ID> \\\r\n-H \"Content-Type: application/json\" \\\r\n-d '{\"status\":\"APPROVED\",\"comment\":\"Looks good\"}'\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Book Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/book-requests/482fa175-3ce9-4eaa-af93-655efbc8d786",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"book-requests",
+								"482fa175-3ce9-4eaa-af93-655efbc8d786"
+							]
+						},
+						"description": "Generated from cURL: curl -X DELETE http://localhost:3000/book-requests/<BOOK_REQUEST_ID>\r\n"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

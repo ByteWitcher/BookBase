@@ -1,18 +1,26 @@
-import models from '../entities/index.js';
-import ReadingSessionRepository from '../repositories/readingSession.repository.js';
+import models from "../entities/index.js";
+import ReadingSessionRepository from "../repositories/readingSession.repository.js";
 
 const { Book, User } = models;
 
-export function validateSessionInput({ book, startPage, endPage, startTime, endTime }) {
-  if (!book) throw new Error('Book not found');
+export function validateSessionInput({
+  book,
+  startPage,
+  endPage,
+  startTime,
+  endTime,
+}) {
+  if (!book) throw new Error("Book not found");
   if (startPage < 1 || endPage > book.pageCount || startPage > endPage) {
-    throw new Error('Invalid page range for this book');
+    throw new Error("Invalid page range for this book");
   }
-  if (!startTime || !endTime) throw new Error('Start and end time are required');
+  if (!startTime || !endTime)
+    throw new Error("Start and end time are required");
   const start = new Date(startTime);
   const end = new Date(endTime);
-  if (isNaN(start.getTime()) || isNaN(end.getTime())) throw new Error('Invalid date format');
-  if (end <= start) throw new Error('End time must be after start time');
+  if (isNaN(start.getTime()) || isNaN(end.getTime()))
+    throw new Error("Invalid date format");
+  if (end <= start) throw new Error("End time must be after start time");
 }
 
 /**
@@ -23,9 +31,14 @@ export function validateSessionInput({ book, startPage, endPage, startTime, endT
  */
 
 class ReadingSessionService {
-
-
-  async createSession({ userId, bookId, startTime, endTime, startPage, endPage }) {
+  async createSession({
+    userId,
+    bookId,
+    startTime,
+    endTime,
+    startPage,
+    endPage,
+  }) {
     const book = await Book.findByPk(bookId);
     validateSessionInput({ book, startPage, endPage, startTime, endTime });
     return await ReadingSessionRepository.create({
@@ -34,18 +47,20 @@ class ReadingSessionService {
       startTime: new Date(startTime),
       endTime: new Date(endTime),
       startPage,
-      endPage
+      endPage,
     });
   }
 
   async updateSession(id, updates) {
     // Fetch current session and book if needed for validation
     const session = await ReadingSessionRepository.findById(id);
-    if (!session) throw new Error('Session not found');
+    if (!session) throw new Error("Session not found");
     const bookId = updates.bookId || session.bookId;
     const book = await Book.findByPk(bookId);
-    const startPage = updates.startPage !== undefined ? updates.startPage : session.startPage;
-    const endPage = updates.endPage !== undefined ? updates.endPage : session.endPage;
+    const startPage =
+      updates.startPage !== undefined ? updates.startPage : session.startPage;
+    const endPage =
+      updates.endPage !== undefined ? updates.endPage : session.endPage;
     const startTime = updates.startTime || session.startTime;
     const endTime = updates.endTime || session.endTime;
     validateSessionInput({ book, startPage, endPage, startTime, endTime });
@@ -60,7 +75,6 @@ class ReadingSessionService {
     return await ReadingSessionRepository.findById(id);
   }
 
-
   async getAllSessionsByUser(userId) {
     return await ReadingSessionRepository.findAllByUser(userId);
   }
@@ -68,7 +82,7 @@ class ReadingSessionService {
   async getLatestSessionByUserAndBook(userId, bookId) {
     const sessions = await ReadingSessionRepository.findAllByUser(userId);
     // Filter by bookId and sort by endTime descending
-    const filtered = sessions.filter(s => s.bookId === bookId);
+    const filtered = sessions.filter((s) => s.bookId === bookId);
     filtered.sort((a, b) => new Date(b.endTime) - new Date(a.endTime));
     return filtered[0] || null;
   }
@@ -83,7 +97,10 @@ class ReadingSessionService {
     // Group by bookId and get farthest page
     const progressMap = {};
     for (const session of sessions) {
-      if (!progressMap[session.bookId] || session.endPage > progressMap[session.bookId].farthestPage) {
+      if (
+        !progressMap[session.bookId] ||
+        session.endPage > progressMap[session.bookId].farthestPage
+      ) {
         progressMap[session.bookId] = { farthestPage: session.endPage };
       }
     }
@@ -95,7 +112,7 @@ class ReadingSessionService {
         result.push({
           bookId,
           title: book.title,
-          farthestPage: progressMap[bookId].farthestPage
+          farthestPage: progressMap[bookId].farthestPage,
         });
       }
     }
@@ -108,7 +125,7 @@ class ReadingSessionService {
    * @returns {Promise<Array<{ userId: string, totalPages: number }>>}
    */
   async getLeaderboard(limit = 10) {
-    const { ReadingSession } = (await import('../entities/index.js')).default;
+    const { ReadingSession } = (await import("../entities/index.js")).default;
     // Use raw query for aggregation
     const results = await ReadingSession.sequelize.query(
       `SELECT "userId", SUM("endPage" - "startPage") AS "totalPages"
@@ -119,25 +136,24 @@ class ReadingSessionService {
       {
         replacements: { limit },
         type: ReadingSession.sequelize.QueryTypes.SELECT,
-      }
-      
+      },
     );
     // Fetch usernames for each userId
-    const userIds = results.map(r => r.userId);
+    const userIds = results.map((r) => r.userId);
     const users = await User.findAll({
       where: { id: userIds },
-      attributes: ['id', 'username'],
-      raw: true
+      attributes: ["id", "username"],
+      raw: true,
     });
-    const userMap = Object.fromEntries(users.map(u => [u.id, u.username]));
+    const userMap = Object.fromEntries(users.map((u) => [u.id, u.username]));
 
     // Add position and username to each result
     return results.map((r, idx) => ({
       position: idx + 1,
       userId: r.userId,
       username: userMap[r.userId] || null,
-      totalPages: Number(r.totalPages)
-  }));
+      totalPages: Number(r.totalPages),
+    }));
   }
 }
 

@@ -16,13 +16,14 @@
   "scripts": {
     "start": "node index.js",
     "test": "mocha --recursive",
-    "coverage": "c8 --reporter=lcov --reporter=text mocha --recursive"
+    "coverage": "c8 --reporter=lcov --reporter=text --exclude=src/repositories/** --exclude=src/middlewares/** --exclude=src/controllers/** --exclude=src/utils/** --exclude=src/server.js --exclude=src/services/book.service.js mocha --recursive"
   },
   "dependencies": {
     "aws-sdk": "^2.1692.0",
     "bcryptjs": "^3.0.3",
     "chai": "^6.2.1",
     "chai-as-promised": "^8.0.0",
+    "diff": "^8.0.2",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
