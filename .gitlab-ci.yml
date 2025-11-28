@@ -41,6 +41,10 @@ integration-tests:
     # NODE_ENV: test
   script:
     - npm ci
+    - apt-get update && apt-get install -y postgresql-client
+    # Test cloud DB connectivity
+    - echo "Checking database connection...."
+    - psql "$DATABASE_URL" -c '\l'
     - npm install -g newman
     - npm start &
     - |
