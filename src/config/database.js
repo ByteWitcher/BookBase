@@ -3,15 +3,15 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// unset SSL when using Dockerized db
-// const useSsl = process.env.DB_SSL === "true";
-// console.log("DB_SSL= ", process.env.DB_SSL);
+// Use SSL only when not in test environment (for cloud databases)
+const useSSL = process.env.NODE_ENV !== "test";
+
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: "postgres",
   logging: false,
-  dialectOptions: {
+  dialectOptions: useSSL ? {
     ssl: { require: true, rejectUnauthorized: false },
-  },
+  } : {},
 });
 
 export default sequelize;
