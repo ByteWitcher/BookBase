@@ -35,12 +35,16 @@ integration-tests:
   variables:
     # Override the cloud DB URL with local PostgreSQL service for CI
     INTEGRATION_DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/testdb"
-    # POSTGRES_DB: testdb
-    # POSTGRES_USER: postgres
-    # POSTGRES_PASSWORD: postgres
+    POSTGRES_DB: testdb
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
     NODE_ENV: test
   script:
     - npm ci
+    - apt-get update && apt-get install -y postgresql-client
+    # Test Docker Postgres connectivity
+    - echo "Testing Postgres connection with psql..."
+    - psql "$INTEGRATION_DATABASE_URL" -c '\l'
     - npm install -g newman
     - npm start &
     - |
