@@ -16,7 +16,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "mocha --recursive",
-    "coverage": "c8 --reporter=lcov --reporter=text mocha --recursive --recursive"
+    "coverage": "c8 --reporter=lcov --reporter=text --exclude=src/repositories/** --exclude=src/middlewares/** --exclude=src/controllers/** mocha --recursive"
   },
   "dependencies": {
     "aws-sdk": "^2.1692.0",

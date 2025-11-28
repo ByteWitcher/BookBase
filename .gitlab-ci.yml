@@ -56,7 +56,8 @@ integration-tests:
         echo "Waiting for server..."
         sleep 5
       done
-    - newman run "postman/collection.json" --env-var "baseUrl=http://localhost:3000" --bail
+    - mkdir -p newman
+    - newman run "postman/collection.json" --env-var "baseUrl=http://localhost:3000" --bail --reporters cli,json,html --reporter-json-export newman/report.json --reporter-html-export newman/report.html
   after_script:
     - pkill -f "node index.js" || true
   artifacts:
