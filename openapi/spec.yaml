@@ -1,0 +1,1039 @@
+openapi: 3.0.3
+info:
+  title: BookBase API
+  description: >
+    Comprehensive documentation for the BookBase API.
+    
+    This API powers a community-driven digital library: managing books, users,
+    reading sessions, gamification, and social interactions.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Local Server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # --- Base Entities ---
+    User:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        username: { type: string }
+        email: { type: string, format: email }
+        role: { type: string, enum: [USER, ADMIN] }
+        createdAt: { type: string, format: date-time }
+
+    Book:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        authors: { type: array, items: { type: string } }
+        description: { type: string }
+        pageCount: { type: integer }
+        averageRating: { type: number, format: float }
+        totalLikes: { type: integer }
+        s3PdfUrl: { type: string }
+        bookTypeId: { type: string, format: uuid }
+        isActive: { type: boolean }
+
+    BookType:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        name: { type: string }
+        description: { type: string }
+
+    BookGenre:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        name: { type: string }
+        description: { type: string }
+
+    BookRequest:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        status: { type: string, enum: [PENDING, APPROVED, REJECTED] }
+        title: { type: string }
+        userId: { type: string, format: uuid }
+
+    Review:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        rating: { type: number }
+        comment: { type: string }
+        userId: { type: string, format: uuid }
+        bookId: { type: string, format: uuid }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    ReadingSession:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        bookId: { type: string, format: uuid }
+        startTime: { type: string, format: date-time }
+        endTime: { type: string, format: date-time }
+        pagesRead: { type: integer }
+
+    ReadingAchievement:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        label: { type: string }
+        unlockedAt: { type: string, format: date-time }
+
+    WeeklySummary:
+      type: object
+      properties:
+        userId: { type: string, format: uuid }
+        weekStart: { type: string, format: date }
+        weekEnd: { type: string, format: date }
+        totalReadingMinutes: { type: integer }
+        totalPagesRead: { type: integer }
+
+tags:
+  - name: Auth
+    description: Authentication (Register, Login)
+  - name: Users
+    description: User Management
+  - name: Catalog (Books)
+    description: Books, Types, and Genres
+  - name: Book Requests
+    description: Book suggestions by users
+  - name: Interactions
+    description: Reviews, Likes, Favorites
+  - name: Reading
+    description: Sessions, Progress, Achievements, Summaries
+
+paths:
+  # ================= AUTH =================
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password]
+              properties:
+                username: { type: string }
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        201:
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        400:
+          description: Validation error
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        200:
+          description: Login successful, token returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+                  user: { $ref: '#/components/schemas/User' }
+
+  /auth/reset-password:
+    post:
+      tags: [Auth]
+      summary: Reset password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, oldPassword, newPassword]
+              properties:
+                email: { type: string }
+                oldPassword: { type: string }
+                newPassword: { type: string }
+      responses:
+        200:
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+
+  # ================= USERS =================
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Get current user profile
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: User profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /users/me/update:
+    put:
+      tags: [Users]
+      summary: Update my profile
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: { type: string }
+                email: { type: string }
+      responses:
+        200:
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /users/me/delete:
+    delete:
+      tags: [Users]
+      summary: Delete my account
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Account deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+
+  /users:
+    get:
+      tags: [Users]
+      summary: List all users (Admin)
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  /users/id/{id}:
+    get:
+      tags: [Users]
+      summary: Get user by ID (Admin)
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /users/email/{email}:
+    get:
+      tags: [Users]
+      summary: Get user by Email (Admin)
+      parameters:
+        - { name: email, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /users/username/{username}:
+    get:
+      tags: [Users]
+      summary: Get user by Username (Admin)
+      parameters:
+        - { name: username, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /users/username/{username}/update:
+    put:
+      tags: [Users]
+      summary: Update a user (Admin)
+      parameters:
+        - { name: username, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /users/username/{username}/delete:
+    delete:
+      tags: [Users]
+      summary: Delete a user (Admin)
+      parameters:
+        - { name: username, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+
+  # ================= BOOKS (CATALOG) =================
+  /books:
+    get:
+      tags: [Catalog (Books)]
+      summary: List books (with filters)
+      parameters:
+        - { name: title, in: query, schema: { type: string } }
+        - { name: author, in: query, schema: { type: string } }
+        - { name: type, in: query, schema: { type: string } }
+        - { name: genre, in: query, schema: { type: string } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Filtered list of books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+    
+    post:
+      tags: [Catalog (Books)]
+      summary: Create a book (Admin - Upload)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                authors: { type: array, items: { type: string } }
+                pageCount: { type: integer }
+                description: { type: string }
+                bookTypeId: { type: string, format: uuid }
+                pdfFile: { type: string, format: binary }
+      responses:
+        201:
+          description: Book created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+
+  /books/{id}:
+    get:
+      tags: [Catalog (Books)]
+      summary: Get book details
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Book details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+    
+    put:
+      tags: [Catalog (Books)]
+      summary: Update a book (Admin)
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Book updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+
+    delete:
+      tags: [Catalog (Books)]
+      summary: Delete a book (Admin)
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Book deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+
+  # ================= BOOK TYPES =================
+  /book-types:
+    get:
+      tags: [Catalog (Books)]
+      summary: List book types
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: List of available book types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookType'
+    post:
+      tags: [Catalog (Books)]
+      summary: Create a book type (Admin)
+      security: [{ bearerAuth: [] }]
+      responses:
+        201:
+          description: Book type created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookType'
+
+  /book-types/id/{id}:
+    get:
+      tags: [Catalog (Books)]
+      summary: Get book type by ID
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Book type found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookType'
+
+  /book-types/{id}:
+    put:
+      tags: [Catalog (Books)]
+      summary: Update a book type (Admin)
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Book type updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookType'
+    delete:
+      tags: [Catalog (Books)]
+      summary: Delete a book type (Admin)
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Book type deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+
+  # ================= BOOK GENRES =================
+  /book-genres:
+    get:
+      tags: [Catalog (Books)]
+      summary: List book genres
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: List of genres
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookGenre'
+    post:
+      tags: [Catalog (Books)]
+      summary: Create a genre (Admin)
+      security: [{ bearerAuth: [] }]
+      responses:
+        201:
+          description: Genre created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookGenre'
+
+  /book-genres/{id}:
+    put:
+      tags: [Catalog (Books)]
+      summary: Update a genre (Admin)
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Genre updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookGenre'
+    delete:
+      tags: [Catalog (Books)]
+      summary: Delete a genre (Admin)
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Genre deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+
+  # ================= BOOK REQUESTS =================
+  /book-requests:
+    get:
+      tags: [Book Requests]
+      summary: List book requests
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: List of requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookRequest'
+    post:
+      tags: [Book Requests]
+      summary: Submit a new book suggestion (Upload)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                authors: { type: array, items: { type: string } }
+                description: { type: string }
+                pdfFile: { type: string, format: binary }
+      responses:
+        201:
+          description: Request submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookRequest'
+
+  /book-requests/{id}:
+    get:
+      tags: [Book Requests]
+      summary: Get request details
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Request details found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookRequest'
+    put:
+      tags: [Book Requests]
+      summary: Moderate a request (Approve/Reject - Admin)
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { type: string, enum: [APPROVED, REJECTED] }
+                comment: { type: string }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Request status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookRequest'
+    delete:
+      tags: [Book Requests]
+      summary: Delete a request (Admin)
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Request deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+
+  # ================= INTERACTIONS =================
+  /books/{id}/favorite:
+    post:
+      tags: [Interactions]
+      summary: Add to favorites
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        201:
+          description: Added to favorites successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
+    delete:
+      tags: [Interactions]
+      summary: Remove from favorites
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Removed from favorites successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
+
+  /favorites/me:
+    get:
+      tags: [Interactions]
+      summary: Get my favorite books
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: List of favorite books
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Book'
+
+  /books/{id}/like:
+    post:
+      tags: [Interactions]
+      summary: Toggle Like
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Book liked or unliked successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
+                  data:
+                    type: object
+                    properties:
+                      liked: { type: boolean }
+                      totalLikes: { type: integer }
+
+  /books/{id}/likes:
+    get:
+      tags: [Interactions]
+      summary: Get users who liked a book
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: List of users who liked the book
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      users:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/User'
+                      total: { type: integer }
+
+  /books/{id}/reviews:
+    get:
+      tags: [Interactions]
+      summary: Get reviews for a book
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: List of reviews
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  averageRating: { type: number }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Review'
+    post:
+      tags: [Interactions]
+      summary: Post a review
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [rating]
+              properties:
+                rating: { type: number }
+                comment: { type: string }
+      responses:
+        201:
+          description: Review created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    $ref: '#/components/schemas/Review'
+
+  /reviews/{reviewId}:
+    put:
+      tags: [Interactions]
+      summary: Update a review
+      parameters:
+        - { name: reviewId, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Review updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    $ref: '#/components/schemas/Review'
+    delete:
+      tags: [Interactions]
+      summary: Delete a review
+      parameters:
+        - { name: reviewId, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Review deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
+
+  /reviews/me:
+    get:
+      tags: [Interactions]
+      summary: Get my reviews
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: List of my reviews
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Review'
+
+  # ================= READING SESSIONS =================
+  /reading-sessions:
+    post:
+      tags: [Reading]
+      summary: Create a reading session
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bookId, startTime, endTime, startPage, endPage]
+              properties:
+                bookId: { type: string, format: uuid }
+                startTime: { type: string, format: date-time }
+                endTime: { type: string, format: date-time }
+                startPage: { type: integer }
+                endPage: { type: integer }
+      responses:
+        201:
+          description: Session created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadingSession'
+
+  /reading-sessions/{id}:
+    get:
+      tags: [Reading]
+      summary: Get session details
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Session details found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadingSession'
+    put:
+      tags: [Reading]
+      summary: Update session
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Session updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadingSession'
+    delete:
+      tags: [Reading]
+      summary: Delete session
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Session deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+
+  /reading-sessions/me:
+    get:
+      tags: [Reading]
+      summary: Get my sessions
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: List of my sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReadingSession'
+
+  /reading-sessions/me/progress:
+    get:
+      tags: [Reading]
+      summary: Get my overall progress
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Reading statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalBooks: { type: integer }
+                  totalSessions: { type: integer }
+
+  /reading-sessions/leaderboard:
+    get:
+      tags: [Reading]
+      summary: Get reading leaderboard
+      responses:
+        200:
+          description: Leaderboard data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    username: { type: string }
+                    pagesRead: { type: integer }
+
+  # ================= READING ACHIEVEMENTS =================
+  /reading-achievements:
+    get:
+      tags: [Reading]
+      summary: List all achievements (Admin)
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: List of available achievements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReadingAchievement'
+
+  /reading-achievements/me:
+    get:
+      tags: [Reading]
+      summary: Get my unlocked achievements
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: List of my achievements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReadingAchievement'
+
+  # ================= WEEKLY SUMMARIES =================
+  /weekly-summaries/me:
+    get:
+      tags: [Reading]
+      summary: Get my weekly summaries
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: List of summaries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WeeklySummary'
+
+  /weekly-summaries/me/current-week:
+    get:
+      tags: [Reading]
+      summary: Get my current week summary
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Summary details for current week
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklySummary'
+
+  /weekly-summaries/generate-current-week:
+    post:
+      tags: [Reading]
+      summary: Generate summaries for ALL users (Admin)
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Generation process triggered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
