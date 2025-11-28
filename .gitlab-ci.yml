@@ -68,6 +68,7 @@ deploy-npm:
     - git config user.email "ci-bot@ensimag.org"
     - git config user.name "CI Bot"
     - git checkout -B dev
+
     - npm version patch
     - npm ci
     - npm publish --tag latest
