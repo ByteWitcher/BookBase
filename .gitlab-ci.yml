@@ -119,9 +119,6 @@ deploy-npm:
     - npm ci
     - npm publish
     - npm dist-tag add @ngs/team_05-template@$UNIQUE_VERSION latest
-  only:
-    - pushes
-    - npm publish --tag latest
   rules:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
       when: on_success
