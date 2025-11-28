@@ -4,6 +4,7 @@ stages:
   - integration tests
   - coverage
   - sonarqube
+  - deploy
 
 format-check:
   stage: formatting
@@ -78,3 +79,41 @@ sonarqube-check:
     - merge_requests
   dependencies: 
     - coverage-report
+
+deploy-npm:
+  stage: deploy
+  image: node:18
+  variables:
+    NODE_ENV: production
+  script:
+    - git config user.email "ci-bot@ensimag.org"
+    - git config user.name "CI Bot"
+    - git checkout -B dev
+
+    - npm version patch
+    - npm ci
+    - npm publish --tag latest
+    - git remote set-url origin https://gitlab-ci-token:${CI_PUSH_TOKEN}@im2ag-gitlab.univ-grenoble-alpes.fr/ngs/team_05/template.git
+    - git push origin dev --tags
+
+  only:
+    - dev
+
+deploy-docker:
+  stage: deploy
+  image: docker:24
+  services:
+    - name: docker:24-dind
+      alias: docker
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    - echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
+    - docker build -t "$DOCKER_IMAGE:$CI_COMMIT_SHA" .
+    - docker push "$DOCKER_IMAGE:$CI_COMMIT_SHA"
+    - docker tag "$DOCKER_IMAGE:$CI_COMMIT_SHA" "$DOCKER_IMAGE:latest"
+    - docker push "$DOCKER_IMAGE:latest"
+  only:
+    - pushes
