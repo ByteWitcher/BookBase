@@ -29,10 +29,28 @@ unit-tests:
 
 integration-tests:
   stage: integration tests
-  image: postman/newman:alpine
+  image: node:18
+  services:
+    - postgres:13
+  variables:
+    NODE_ENV: test
   script:
+    - npm ci
+    - echo "Starting the server in background..."
+    - npm start &
+    - SERVER_PID=$!
+    - echo "Waiting for server to be ready..."
+    - sleep 15
+    - echo "Testing server health..."
+    - curl -f http://localhost:3000/ || (echo "Server not responding" && kill $SERVER_PID && exit 1)
+    - echo "Server is ready! Installing Newman..."
+    - npm install -g newman
     - echo "Running Postman integration tests with Newman..."
-    - newman run postman/collection.json --env-var "baseUrl=http://localhost:3000" --insecure --timeout-request 60000 --bail --verbose --folder "05. Books" --folder "06. Book Requests" --folder "08. Reading Sessions & Progress" --folder "09. Weekly Summaries & Achievements"
+    - newman run postman/collection.json --env-var "baseUrl=http://localhost:3000" --insecure --timeout-request 60000 --bail --verbose --folder "01. Auth & Setup" --folder "02. User Management" --folder "03. Book Types" --folder "04. Book Genres" --folder "05. Books" --folder "06. Book Requests" --folder "07. Favorites, Likes, Reviews" --folder "08. Reading Sessions & Progress" --folder "09. Weekly Summaries & Achievements" --folder "10. Cleanup & Delete"
+  after_script:
+    - echo "Stopping server..."
+    - kill $SERVER_PID || true
+    - sleep 2
   artifacts:
     when: always
     paths:
@@ -42,7 +60,6 @@ integration-tests:
   dependencies:
     - unit-tests
   before_script:
-    - apk add --no-cache curl
     # Ensure Book.pdf is present in the correct path for file upload
     - cp postman/Book.pdf Book.pdf
 

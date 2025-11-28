@@ -15,6 +15,7 @@ import BookRequestController from "./controllers/book-request.controller.js";
 import favoriteController from "./controllers/favorite.controller.js";
 import likeController from "./controllers/like.controller.js";
 import reviewController from "./controllers/review.controller.js";
+import seedUtil from "./utils/seed.util.js";
 
 export class Server {
   async listen(port = 3000) {
@@ -41,6 +42,14 @@ export class Server {
       console.log("Database synced successfully.");
     } catch (err) {
       console.error("Database sync error:", err);
+      process.exit(1);
+    }
+
+    // Seed default data (admin user, etc.)
+    try {
+      await seedUtil.seedDatabase();
+    } catch (err) {
+      console.error("Database seeding error:", err);
       process.exit(1);
     }
 
