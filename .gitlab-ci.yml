@@ -30,20 +30,21 @@ unit-tests:
 integration-tests:
   stage: integration tests
   image: node:18
-  # services:
-  #   - postgres:13
+  services:
+    - postgres:13
   variables:
     # Override the cloud DB URL with local PostgreSQL service for CI
-    # DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/testdb"
-    # POSTGRES_DB: testdb
-    # POSTGRES_USER: postgres
-    # POSTGRES_PASSWORD: postgres
-    # NODE_ENV: test
+    DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/testdb"
+    POSTGRES_DB: testdb
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    NODE_ENV: test
   script:
     - npm ci
     - apt-get update && apt-get install -y postgresql-client
     # Test cloud DB connectivity
     - echo "Checking database connection...."
+    - echo "$DATABASE_URL"
     - psql "$DATABASE_URL" -c '\l'
     - npm install -g newman
     - npm start &
